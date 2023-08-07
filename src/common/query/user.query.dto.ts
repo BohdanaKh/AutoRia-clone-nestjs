@@ -36,5 +36,5 @@ export class PublicUserInfoDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  class: string;
+  city: string;
 }

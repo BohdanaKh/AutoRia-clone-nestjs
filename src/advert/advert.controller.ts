@@ -1,4 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
 
 @Controller('advert')
-export class AdvertController {}
+export class AdvertController {
+  constructor() {}
+
+  @Post(':userId/create')
+  // check if user exists
+  async createAdvertForUser() {}
+}

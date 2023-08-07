@@ -1,16 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 import { paginateRawAndEntities } from 'nestjs-typeorm-paginate';
+import * as process from 'process';
 import { Repository } from 'typeorm';
 
 import { AuthService } from '../auth/auth.service';
 import { PaginatedDto } from '../common/pagination/response';
 import { PublicUserInfoDto } from '../common/query/user.query.dto';
 import { UserCreateDto } from './dto/user.create.dto';
+import { UserloginDto } from './dto/user.login.dto';
+import { UserloginSocialDto } from './dto/user.social.login.dto';
 import { PublicUserData } from './interface/user.interface';
 import { User } from './user.entity';
-import { UserloginDto } from "./dto/user.login.dto";
 
 @Injectable()
 export class UsersService {
@@ -33,12 +36,19 @@ export class UsersService {
 
     const queryBuilder = this.userRepository
       .createQueryBuilder('users')
+      .innerJoin('users.advert', 'adv')
       .select('id, age, email, "userName"');
 
     if (query.search) {
       queryBuilder.where('"userName" IN(:...search)', {
         search: query.search.split(','),
       });
+    }
+
+    if (query.city) {
+      queryBuilder.andWhere(
+        `LOWER(adv.city) LIKE '%${query.city.toLowerCase()}%'`,
+      );
     }
 
     queryBuilder.orderBy(`"${query.sort}"`, query.order as 'ASC' | 'DESC');
@@ -100,6 +110,25 @@ export class UsersService {
     const token = await this.singIn(findUser);
 
     return { token };
+  }
+
+  async loginSocial(data: UserloginSocialDto) {
+    try {
+      const oAuthClient = new OAuth2Client(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+      );
+
+      const result = await oAuthClient.verifyIdToken({
+        idToken: data.accessToken,
+      });
+
+      const tokenPayload = result.getPayload();
+      const token = await this.singIn({ id: tokenPayload.sub });
+      return { token };
+    } catch (e) {
+      throw new HttpException('Google auth failed', HttpStatus.UNAUTHORIZED);
+    }
   }
 
   async getHash(password: string) {

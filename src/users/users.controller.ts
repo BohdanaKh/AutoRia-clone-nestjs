@@ -17,6 +17,7 @@ import {
 import { PublicUserInfoDto } from '../common/query/user.query.dto';
 import { UserCreateDto } from './dto/user.create.dto';
 import { UserloginDto } from './dto/user.login.dto';
+import { UserloginSocialDto } from './dto/user.social.login.dto';
 import { PublicUserData } from './interface/user.interface';
 import { UsersService } from './users.service';
 
@@ -41,6 +42,11 @@ export class UsersController {
   @Post('login')
   async loginUser(@Body() body: UserloginDto) {
     return this.usersService.login(body);
+  }
+
+  @Post('social/login')
+  async loginSocialUser(@Body() body: UserloginSocialDto) {
+    return this.usersService.loginSocial(body);
   }
   // @Get(':userId')
   // async getUserProfile(@Param('userId') userId: string) {

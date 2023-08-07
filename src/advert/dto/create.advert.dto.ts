@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+
+import Currency from '../currency.enum';
 
 export class CreateAdvertDTO {
   @ApiProperty()
@@ -23,6 +31,11 @@ export class CreateAdvertDTO {
   @IsNumber()
   @IsNotEmpty()
   price: number;
+
+  @ApiProperty()
+  @IsEnum(Currency)
+  @IsOptional()
+  currency: Currency;
 
   @ApiProperty()
   @IsOptional()
