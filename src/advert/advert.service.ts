@@ -70,4 +70,22 @@ export class AdvertService {
   async deleteAdvert(advertId: string) {
     return await this.adsRepository.delete({ id: +advertId });
   }
+
+  async getViews(advertId: string): Promise<number> {
+    return await this.adsRepository.countAllViews({ id: +advertId });
+  }
+  async getViewsPerDay(advertId: string): Promise<number> {
+    return this.adsRepository.countViewsPerTimeframe(advertId, 'day');
+  }
+
+  async getViewsPerWeek(advertId: string): Promise<number> {
+    return this.adsRepository.countViewsPerTimeframe(advertId, 'week');
+  }
+
+  async getViewsPerMonth(advertId: string): Promise<number> {
+    return this.adsRepository.countViewsPerTimeframe(advertId, 'month');
+  }
+  async getAveragePriceByRegion(advertId: string): Promise<any> {
+    await this.adsRepository.getAveragePriceByRegion(advertId);
+  }
 }

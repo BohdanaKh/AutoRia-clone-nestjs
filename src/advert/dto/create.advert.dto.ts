@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 import IsNotProfanity from '../../common/decorators/censor-bad-words.decorator';
-import Currency from '../currency.enum';
+import Currency from '../interface/currency.enum';
 
 export class CreateAdvertDTO {
   @ApiProperty()
@@ -81,9 +81,8 @@ export class CreateAdvertDTO {
   photo: string;
 
   @ApiProperty()
-  @IsNumber()
   @IsOptional()
-  views: number;
+  views: Date[];
 
   @ApiProperty()
   @IsBoolean()

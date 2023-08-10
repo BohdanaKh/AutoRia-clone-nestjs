@@ -17,9 +17,6 @@ import { Action } from '../casl/action.enum';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { CheckPolicies } from '../casl/check-policy.decorator';
 import { PoliciesGuard } from '../casl/policies.guard';
-// import { LocalAuthGuard } from "../auth/guard/local-auth.guard";
-// import { Roles } from '../common/decorators/roles.decorator';
-// import { RolesGuard } from '../common/guards/roles.guard';
 import {
   ApiPaginatedResponse,
   PaginatedDto,
@@ -29,7 +26,6 @@ import { UserCreateDto } from './dto/user.create.dto';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { PublicUserData } from './interface/user.interface';
 import { User } from './user.entity';
-// import Role from './roles/user.role.enum';
 import { UsersService } from './users.service';
 
 @ApiTags('User')
@@ -41,8 +37,6 @@ export class UsersController {
   @UseGuards(AuthGuard())
   @ApiPaginatedResponse('entities', User)
   @Get('list')
-  // @Roles(Role.Admin, Role.Manager)
-  // @UseGuards(RolesGuard)
   async geAllUsers(@Query() query: PublicUserInfoDto) {
     return this.usersService.getAllUsers(query);
   }
@@ -58,11 +52,6 @@ export class UsersController {
   async createManagerAccount(@Req() req: any, @Body() body: UserCreateDto) {
     return this.usersService.createUser(body);
   }
-
-  // @UseGuards(LocalAuthGuard)
-
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.Manager, Role.Admin)
   @Get(':userId')
   async getUserProfile(@Param('userId') id: string) {
     return this.usersService.getOneUser(id);

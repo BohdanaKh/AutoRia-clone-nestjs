@@ -51,13 +51,11 @@ export class Advert {
   @Column({ type: 'varchar' })
   photo: string;
 
-  @Column('int')
-  views: number;
+  @Column('timestamp', { array: true, default: [] })
+  views: Date[];
 
   @Column({ type: 'boolean', default: false })
   isPublished: boolean;
-
-
 
   // @OneToOne(() => User)
   // @JoinColumn()

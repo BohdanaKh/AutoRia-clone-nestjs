@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import * as dayjs from 'dayjs';
 import { DataSource, Repository } from 'typeorm';
 
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
@@ -34,7 +35,7 @@ export class AdvertRepository extends Repository<Advert> {
 
     if (query.categories) {
       queryBuilder.andWhere(`LOWER(ani.categories) LIKE '%:categories%'`, {
-        class: query.categories.toLowerCase(),
+        categories: query.categories.toLowerCase(),
       });
     }
 
@@ -69,18 +70,47 @@ export class AdvertRepository extends Repository<Advert> {
   async createAdvert(userId: string, data: CreateAdvertDTO) {
     const user = await this.userRepository.findOneBy({});
     return await this.save({ ...data, user: user });
-    // const findUser = await this.findOne({
-    //   where: { email: data.email },
-    // });
-    // if (findUser) {
-    //   throw new HttpException(
-    //     'User with this email already exists',
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
   }
 
   //   async findOne(advertId) {
   //     const user = await this.userRepository.findOneBy({});
   //     return await this.findOne({ advertId, user: user });
+
+  async countAllViews(advertId): Promise<number> {
+    const advert = await this.findOneBy(advertId);
+    let totalViews = 0;
+    totalViews += advert.views.length;
+    return totalViews;
+  }
+  async countViewsPerTimeframe(
+    advertId,
+    timeframe: 'day' | 'week' | 'month',
+  ): Promise<number> {
+    const advert = await this.findOneBy(advertId);
+    const now = dayjs();
+    const timeframeMap = {
+      day: 'day',
+      week: 'week',
+      month: 'month',
+    };
+
+    let viewsCount = 0;
+    const viewsWithinTimeframe = advert.views.filter((view) =>
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      dayjs(view).isAfter(now.subtract(1, timeframeMap[timeframe])),
+    );
+    viewsCount += viewsWithinTimeframe.length;
+    return viewsCount;
+  }
+
+  async getAveragePriceByRegion(advertId): Promise<any> {
+    const averagePrice = await this.createQueryBuilder('advert', advertId)
+      .select('advert.region', 'region')
+      .addSelect('AVG(advert.price)', 'averagePrice')
+      .groupBy('advert.region')
+      .getRawMany();
+
+    return averagePrice;
+  }
 }

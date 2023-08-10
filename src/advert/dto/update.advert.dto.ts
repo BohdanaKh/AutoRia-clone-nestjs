@@ -71,9 +71,8 @@ export class UpdateAdvertDto {
   photo: string;
 
   @ApiProperty()
-  @IsNumber()
   @IsOptional()
-  views: number;
+  views: Date[];
 
   @ApiProperty()
   @IsBoolean()
