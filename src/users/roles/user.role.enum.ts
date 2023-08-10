@@ -1,6 +1,6 @@
 enum Role {
   Buyer = 'Buyer',
-  User = 'Seller',
+  User = 'User',
   Manager = 'Manager',
   Admin = 'Admin',
 }

@@ -1,8 +1,9 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
+
+import { AppModule } from './app.module';
 
 const environment = process.env.NODE_ENV ?? '';
 dotenv.config({ path: `environments/${environment}.env` });
@@ -14,7 +15,7 @@ async function bootstrap() {
     .setTitle('AUTORIA clone')
     .setDescription('AutoRia API description')
     .setVersion('1.0')
-    .addTag('adverts')
+    .addTag('')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

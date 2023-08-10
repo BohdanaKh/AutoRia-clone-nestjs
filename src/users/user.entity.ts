@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 
 import { Advert } from '../advert/advert.entity';
-import Role from './roles/user.role.enum';
 
 @Entity()
 export class User {
@@ -30,13 +29,11 @@ export class User {
   @Column({ type: 'varchar', nullable: false })
   password: string;
 
-  @Column({
-    type: 'enum',
-    enum: Role,
-    array: true,
-    default: [Role.User],
-  })
-  role: Role;
+  @Column({ default: 'User' })
+  role: string;
+
+  @Column({ default: false, nullable: false })
+  isPremium: boolean;
 
   @OneToOne(() => Advert) //FOR SIMPLE ACCOUNT
   @JoinColumn()

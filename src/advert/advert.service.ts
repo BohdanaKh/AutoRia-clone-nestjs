@@ -1,16 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { PaginatedDto } from '../common/pagination/response';
+import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
+import { User } from '../users/user.entity';
 import { Advert } from './advert.entity';
-import { FilterAdvertDto } from './dto/filter.advert.dto';
+import { AdvertRepository } from './advert.repository';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
+import { UpdateAdvertDto } from './dto/update.advert.dto';
 
 @Injectable()
 export class AdvertService {
-  // constructor(
-  //   @InjectRepository(Advert)
-  //   private readonly advertRepository: Repository<Advert>,
-  // ) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+
+    private readonly adsRepository: AdvertRepository,
+  ) {}
+
+  async getUserAdsCount(userId: string): Promise<number> {
+    console.log(userId);
+    return await this.adsRepository.countBy({});
+  }
+
+  async createAdvert(userId: string, data: CreateAdvertDTO): Promise<Advert> {
+    return this.adsRepository.createAdvert(userId, data);
+  }
+
+  async getAdvertWithUser(advertId: number): Promise<Advert> {
+    return await this.adsRepository.findOne({
+      where: { id: advertId },
+      relations: { user: true },
+    });
+  }
 
   // async getFilteredAdverts(filterAdvertDTO: FilterAdvertDto): Promise<any> {
   //   const { category, search } = filterAdvertDTO;
@@ -30,37 +53,21 @@ export class AdvertService {
   //   return adverts;
   // }
   //
-  // async getAllAdverts() {
-  //   return this.adverts;
-  // }
-  //
-  // async getAdvert(id: string) {
-  //   const advert = this.adverts.find((item) => item.id.toString() === id);
-  //   console.log(advert);
-  //   return advert;
-  // }
-  //
-  // async addAdvert(createAdvertDTO: CreateAdvertDTO) {
-  //   return this.adverts.push({
-  //     id: this.adverts.length + 1,
-  //     ...createAdvertDTO,
-  //   });
-  // }
-  //
-  // async updateAdvert(id: string, createAdvertDTO: CreateAdvertDTO) {
-  //   const updatedAdvert = this.adverts.find(
-  //     (item) => item.id.toString() === id,
-  //   );
-  //   // @ts-ignore
-  //   updatedAdver = { id: +id, createAdverDTO };
-  //   return updatedAdvert;
-  // }
-  //
-  // async deleteAdvert(id: string) {
-  //   const deletedAdvert = this.adverts.find(
-  //     (item) => item.id.toString() === id,
-  //   );
-  //   const i = this.adverts.indexOf(deletedAdvert);
-  //   return this.adverts.splice(i, 1);
-  // }
+  async getAllAds(query: PublicAdvertInfoDto): Promise<PaginatedDto<Advert>> {
+    return await this.adsRepository.getAllAds(query);
+  }
+
+  async updateAdvert(advertId: string, updateAdvertDTO: UpdateAdvertDto) {
+    await this.adsRepository.findOne({
+      where: { id: +advertId },
+    });
+    return await this.adsRepository.update(
+      { id: +advertId },
+      { ...updateAdvertDTO },
+    );
+  }
+
+  async deleteAdvert(advertId: string) {
+    return await this.adsRepository.delete({ id: +advertId });
+  }
 }

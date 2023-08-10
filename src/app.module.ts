@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmConfiguration } from './config/database/type-orm-configuration';
 import { UsersModule } from './users/users.module';
+import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AdvertModule,
     AuthModule,
+    CaslModule,
   ],
   controllers: [AppController],
   providers: [AppService],

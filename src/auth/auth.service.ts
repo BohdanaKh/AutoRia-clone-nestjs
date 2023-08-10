@@ -1,8 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
+import process from 'process';
 import { Repository } from 'typeorm';
 
+import { UserloginDto } from '../users/dto/user.login.dto';
+import { UserloginSocialDto } from '../users/dto/user.social.login.dto';
 import { User } from '../users/user.entity';
 import { JWTPayload } from './interface/auth.interface';
 
@@ -13,7 +23,45 @@ export class AuthService {
     @InjectRepository(User)
     public readonly userRepository: Repository<User>,
   ) {}
+  async login(data: UserloginDto) {
+    const findUser = await this.userRepository.findOne({
+      where: { email: data.email },
+    });
+    if (!findUser) {
+      throw new HttpException(
+        'Email or password is not correct',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    if (!(await this.compareHash(data.password, findUser.password))) {
+      throw new HttpException(
+        'Email or password is not correct',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    const token = await this.singInUser(findUser);
 
+    return { token };
+  }
+
+  async loginSocial(data: UserloginSocialDto) {
+    try {
+      const oAuthClient = new OAuth2Client(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+      );
+
+      const result = await oAuthClient.verifyIdToken({
+        idToken: data.accessToken,
+      });
+
+      const tokenPayload = result.getPayload();
+      const token = await this.singInUser({ id: tokenPayload.sub });
+      return { token };
+    } catch (e) {
+      throw new HttpException('Google auth failed', HttpStatus.UNAUTHORIZED);
+    }
+  }
   async signIn(data: JWTPayload): Promise<string> {
     return this.jwtService.sign(data);
   }
@@ -54,5 +102,15 @@ export class AuthService {
         token,
       );
     }
+  }
+
+  async singInUser(user) {
+    return await this.signIn({
+      id: user.id,
+    });
+  }
+  //
+  async compareHash(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
   }
 }

@@ -15,31 +15,49 @@ export class Advert {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'int', nullable: false })
+  year: number;
+
+  @Column({ type: 'int', nullable: false })
+  price: number;
+
+  @Column({ type: 'enum', enum: Currency, nullable: false })
+  currency: Currency;
+
   @Column({ type: 'varchar', nullable: false })
-  city: string;
+  categories: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  brand: string;
 
   @Column({ type: 'varchar', nullable: false })
   model: string;
 
   @Column({ type: 'varchar', nullable: false })
-  brand: string;
-  @Column('text')
-  description: string;
+  modification: string;
 
-  @Column()
-  filename: string;
+  @Column({ type: 'varchar', nullable: false })
+  body: string;
+
+  @Column({ type: 'int', nullable: false })
+  mileage: number;
+
+  @Column({ type: 'varchar', nullable: false })
+  region: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  city: string;
+
+  @Column({ type: 'varchar' })
+  photo: string;
 
   @Column('int')
   views: number;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: false })
   isPublished: boolean;
 
-  @Column({ type: 'int', nullable: false })
-  price: number;
 
-  @Column({ type: 'enum', enum: Currency })
-  currency: Currency;
 
   // @OneToOne(() => User)
   // @JoinColumn()

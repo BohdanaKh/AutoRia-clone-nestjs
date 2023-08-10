@@ -2,82 +2,72 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEnum,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 
-import IsNotProfanity from '../../common/decorators/censor-bad-words.decorator';
 import Currency from '../currency.enum';
 
-export class CreateAdvertDTO {
+export class UpdateAdvertDto {
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   year: number;
 
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   price: number;
 
   @ApiProperty()
   @IsEnum(Currency)
-  @IsNotEmpty()
+  @IsOptional()
   currency: Currency;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsNotProfanity('categories')
+  @IsOptional()
   categories: string;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsNotProfanity('brand')
+  @IsOptional()
   brand: string;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsNotProfanity('model')
+  @IsOptional()
   model: string;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsNotProfanity('modification')
+  @IsOptional()
   modification: string;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsNotProfanity('body')
+  @IsOptional()
   body: string;
 
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   mileage: number;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsNotProfanity('region')
+  @IsOptional()
   region: string;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsNotProfanity('city')
+  @IsOptional()
   city: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @IsNotProfanity('photo')
   photo: string;
 
   @ApiProperty()

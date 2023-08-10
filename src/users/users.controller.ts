@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -10,15 +13,23 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
 
+import { Action } from '../casl/action.enum';
+import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
+import { CheckPolicies } from '../casl/check-policy.decorator';
+import { PoliciesGuard } from '../casl/policies.guard';
+// import { LocalAuthGuard } from "../auth/guard/local-auth.guard";
+// import { Roles } from '../common/decorators/roles.decorator';
+// import { RolesGuard } from '../common/guards/roles.guard';
 import {
   ApiPaginatedResponse,
   PaginatedDto,
 } from '../common/pagination/response';
 import { PublicUserInfoDto } from '../common/query/user.query.dto';
 import { UserCreateDto } from './dto/user.create.dto';
-import { UserloginDto } from './dto/user.login.dto';
-import { UserloginSocialDto } from './dto/user.social.login.dto';
+import { UserUpdateDto } from './dto/user.update.dto';
 import { PublicUserData } from './interface/user.interface';
+import { User } from './user.entity';
+// import Role from './roles/user.role.enum';
 import { UsersService } from './users.service';
 
 @ApiTags('User')
@@ -28,9 +39,11 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(AuthGuard())
-  @ApiPaginatedResponse('entities', PublicUserData)
+  @ApiPaginatedResponse('entities', User)
   @Get('list')
-  async getUserList(@Query() query: PublicUserInfoDto) {
+  // @Roles(Role.Admin, Role.Manager)
+  // @UseGuards(RolesGuard)
+  async geAllUsers(@Query() query: PublicUserInfoDto) {
     return this.usersService.getAllUsers(query);
   }
 
@@ -39,34 +52,35 @@ export class UsersController {
     return this.usersService.createUser(body);
   }
 
-  @Post('login')
-  async loginUser(@Body() body: UserloginDto) {
-    return this.usersService.login(body);
+  @Post('managers/account/create')
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, User))
+  async createManagerAccount(@Req() req: any, @Body() body: UserCreateDto) {
+    return this.usersService.createUser(body);
   }
 
-  @Post('social/login')
-  async loginSocialUser(@Body() body: UserloginSocialDto) {
-    return this.usersService.loginSocial(body);
+  // @UseGuards(LocalAuthGuard)
+
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.Manager, Role.Admin)
+  @Get(':userId')
+  async getUserProfile(@Param('userId') id: string) {
+    return this.usersService.getOneUser(id);
   }
-  // @Get(':userId')
-  // async getUserProfile(@Param('userId') userId: string) {
-  //   return this.usersService.;
+  //
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.Admin)
+  // @Get('/admin')
+  // getDashboard(@Request() req) {
+  //   return req.user;
   // }
+  @Delete(':userId')
+  async deleteUserAccount(@Param('userId') userId: string) {
+    return this.usersService.delete(userId);
+  }
 
-  // @Delete(':userId')
-  // async deleteUserAccount(@Param('userId') userId: string) {
-  //   return this.usersService.remove(+userId);;
-  // }
-
-  // @Patch(':userId')
-  // async updateUserProfile(@Param('userId') userId: string, @Body() body: any) {
-  //   return '';
-  // }
-  // @Patch(':userId')
-  // async update(
-  //   @Param('userId') userId: string,
-  //   @Body() updateUserDto: UpdateUserDto,
-  // ) {
-  //   return this.usersService.update(+userId, updateUserDto);
-  // }
+  @Patch(':userId')
+  async update(@Param('userId') userId: string, @Body() body: UserUpdateDto) {
+    return this.usersService.update(+userId, body);
+  }
 }
