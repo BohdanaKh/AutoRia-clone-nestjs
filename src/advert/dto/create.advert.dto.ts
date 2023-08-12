@@ -20,12 +20,22 @@ export class CreateAdvertDTO {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  price: number;
+  priceUAH: number;
 
   @ApiProperty()
-  @IsEnum(Currency)
-  @IsNotEmpty()
-  currency: Currency;
+  @IsNumber()
+  @IsOptional()
+  priceUSD: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  priceEUR: number;
+
+  // @ApiProperty()
+  // @IsEnum(Currency)
+  // @IsNotEmpty()
+  // currency: Currency;
 
   @ApiProperty()
   @IsString()

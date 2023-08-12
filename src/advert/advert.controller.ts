@@ -22,6 +22,8 @@ import {
   GetPremiumAccount,
   Premium,
 } from '../common/decorators/premium.decorator';
+import { MailTemplate } from '../common/mail/mail.interface';
+import { MailService } from '../common/mail/mail.service';
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
 import { User } from '../users/user.entity';
 import { Advert } from './advert.entity';
@@ -36,6 +38,7 @@ export class AdvertController {
   constructor(
     private readonly advertService: AdvertService,
     private readonly carValidationService: CarValidationService,
+    private readonly mailService: MailService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
@@ -52,23 +55,29 @@ export class AdvertController {
     @Param('userId') userId: string,
     @Body() body: CreateAdvertDTO,
   ) {
-    const selectedBrand = body.brand;
-
-    if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
-      // Inform administration about the missing brand
-
-      throw new BadRequestException(
-        `Invalid car brand selected. Please inform administration about missing brand: ${selectedBrand}`,
-      );
-    }
-
     const user = await this.userRepository.findOneBy({ id: userId });
+    console.log(user);
     const isPremium = user.isPremium;
-    if (!isPremium) {
+    console.log(isPremium);
+    if (isPremium === false) {
       const adsLimit = 1;
-      const adsCount = await this.advertService.getUserAdsCount(userId);
+      const adsCount = await this.advertService.getUserAdsCount(user);
 
       if (adsCount < adsLimit) {
+        const selectedBrand = body.brand;
+        console.log(selectedBrand);
+
+        if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
+          await this.mailService.send(
+            'dananvm@gmail.com',
+            'Missing Car Brand Notification',
+            MailTemplate.MISSING_BRAND_NOTIFICATION,
+            { selectedBrand },
+          );
+          throw new BadRequestException(
+            `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
+          );
+        }
         return this.advertService.createAdvert(userId, body);
       } else {
         return {
@@ -77,6 +86,19 @@ export class AdvertController {
         };
       }
     } else {
+      const selectedBrand = body.brand;
+
+      if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
+        await this.mailService.send(
+          'dananvm@gmail.com',
+          'Missing Car Brand Notification',
+          MailTemplate.MISSING_BRAND_NOTIFICATION,
+          { selectedBrand },
+        );
+        throw new BadRequestException(
+          `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
+        );
+      }
       return this.advertService.createAdvert(userId, body);
     }
   }
@@ -144,5 +166,10 @@ export class AdvertController {
     } else {
       return 'Access denied. Premium account required.';
     }
+  }
+  @Premium()
+  @Get('average-price')
+  async getAveragePriceOfCars(): Promise<number> {
+    return await this.advertService.getAveragePriceOfCars();
   }
 }

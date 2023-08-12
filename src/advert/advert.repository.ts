@@ -6,12 +6,14 @@ import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
 import { UsersRepository } from '../users/users.repository';
 import { Advert } from './advert.entity';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
+import { ExchangeRateService } from './interface/exchange-rate.service';
 
 @Injectable()
 export class AdvertRepository extends Repository<Advert> {
   constructor(
     private readonly dataSource: DataSource,
     private readonly userRepository: UsersRepository,
+    private readonly exchangeRateService: ExchangeRateService,
   ) {
     super(Advert, dataSource.manager);
   }
@@ -69,7 +71,20 @@ export class AdvertRepository extends Repository<Advert> {
 
   async createAdvert(userId: string, data: CreateAdvertDTO) {
     const user = await this.userRepository.findOneBy({});
-    return await this.save({ ...data, user: user });
+    const exchangeRate = await this.exchangeRateService.fetchExchangeRates();
+    console.log(exchangeRate);
+    const calculatedPrices = {
+      priceUAH: data.priceUAH || (data.priceUSD || data.priceEUR) * exchangeRate,
+      priceUSD: data.priceUSD || (data.priceUAH || data.priceEUR) / exchangeRate,
+      priceEUR: data.priceEUR || (data.priceUAH || data.priceUSD) / exchangeRate,
+    };
+    const newAdvert = this.create({
+      ...data,
+      calculatedPrices,
+      exchangeRate,
+      // userSpecifiedPrice: data.priceUAH,
+    });
+    return await this.save({ newAdvert, user: user });
   }
 
   //   async findOne(advertId) {
@@ -105,12 +120,17 @@ export class AdvertRepository extends Repository<Advert> {
   }
 
   async getAveragePriceByRegion(advertId): Promise<any> {
-    const averagePrice = await this.createQueryBuilder('advert', advertId)
+    return await this.createQueryBuilder('advert', advertId)
       .select('advert.region', 'region')
-      .addSelect('AVG(advert.price)', 'averagePrice')
+      .addSelect('AVG(advert.priceUAH)', 'averagePrice')
       .groupBy('advert.region')
       .getRawMany();
+  }
+  async getAveragePrice(): Promise<number> {
+    const result = await this.createQueryBuilder('advert')
+      .select('AVG(advert.priceUAH)', 'averagePrice')
+      .getRawOne();
 
-    return averagePrice;
+    return result.averagePrice || 0;
   }
 }

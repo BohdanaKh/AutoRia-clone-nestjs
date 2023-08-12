@@ -5,12 +5,14 @@ import {
   ManyToOne,
   // OneToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 
 import { User } from '../users/user.entity';
-import Currency from './currency.enum';
+import Currency from './interface/currency.enum';
 
 @Entity()
+@Unique(['id', 'brand', 'model', 'year'])
 export class Advert {
   @PrimaryGeneratedColumn()
   id: number;
@@ -19,10 +21,22 @@ export class Advert {
   year: number;
 
   @Column({ type: 'int', nullable: false })
-  price: number;
+  priceUAH: number;
 
-  @Column({ type: 'enum', enum: Currency, nullable: false })
-  currency: Currency;
+  @Column({ type: 'int', nullable: false })
+  priceUSD: number;
+
+  @Column({ type: 'int', nullable: false })
+  priceEUR: number;
+
+  // @Column({ type: 'enum', enum: Currency, nullable: false })
+  // currency: Currency;
+
+  @Column({ type: 'float' })
+  exchangeRate: number;
+
+  @Column({ type: 'float' })
+  userSpecifiedPrice: number;
 
   @Column({ type: 'varchar', nullable: false })
   categories: string;

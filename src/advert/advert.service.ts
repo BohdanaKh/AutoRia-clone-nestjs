@@ -1,4 +1,6 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -9,6 +11,7 @@ import { Advert } from './advert.entity';
 import { AdvertRepository } from './advert.repository';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
 import { UpdateAdvertDto } from './dto/update.advert.dto';
+import { ExchangeRateService } from './interface/exchange-rate.service';
 
 @Injectable()
 export class AdvertService {
@@ -17,11 +20,12 @@ export class AdvertService {
     private readonly userRepository: Repository<User>,
 
     private readonly adsRepository: AdvertRepository,
+    private readonly httpService: HttpService,
+    private readonly exchangeRateService: ExchangeRateService,
   ) {}
 
-  async getUserAdsCount(userId: string): Promise<number> {
-    console.log(userId);
-    return await this.adsRepository.countBy({});
+  async getUserAdsCount(user): Promise<number> {
+    return await this.adsRepository.countBy({ user: user });
   }
 
   async createAdvert(userId: string, data: CreateAdvertDTO): Promise<Advert> {
@@ -87,5 +91,29 @@ export class AdvertService {
   }
   async getAveragePriceByRegion(advertId: string): Promise<any> {
     await this.adsRepository.getAveragePriceByRegion(advertId);
+  }
+
+  async getAveragePriceOfCars(): Promise<number> {
+    return this.adsRepository.getAveragePrice();
+  }
+  async calculateAndUpdatePrices() {
+    // Fetch exchange rates from the bank's API
+    const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
+
+    // Get the latest original prices from the database
+    const originalPrices = await this.adsRepository.find();
+
+    // Calculate prices in other currencies and update in the database
+    const updatedPrices = originalPrices.map((advert) => {
+      const exchangeRate = exchangeRates[advert.currency];
+      const calculatedAmount = advert.userSpecifiedPrice * exchangeRate;
+      return { ...advert, calculatedAmount, exchangeRate };
+    });
+
+    await this.adsRepository.save(updatedPrices);
+  }
+  @Cron('0 0 * * *')
+  async updatePricesDaily() {
+    await this.calculateAndUpdatePrices();
   }
 }

@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-
-import Currency from '../currency.enum';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateAdvertDto {
   @ApiProperty()
@@ -18,12 +10,22 @@ export class UpdateAdvertDto {
   @ApiProperty()
   @IsNumber()
   @IsOptional()
-  price: number;
+  priceUAH: number;
 
   @ApiProperty()
-  @IsEnum(Currency)
+  @IsNumber()
   @IsOptional()
-  currency: Currency;
+  priceUSD: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  priceEUR: number;
+
+  // @ApiProperty()
+  // @IsEnum(Currency)
+  // @IsOptional()
+  // currency: Currency;
 
   @ApiProperty()
   @IsString()
