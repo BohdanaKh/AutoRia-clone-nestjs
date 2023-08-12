@@ -6,7 +6,7 @@ import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
 import { UsersRepository } from '../users/users.repository';
 import { Advert } from './advert.entity';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
-import { ExchangeRateService } from './interface/exchange-rate.service';
+import { ExchangeRateService } from './exchange-rate.service';
 
 @Injectable()
 export class AdvertRepository extends Repository<Advert> {
@@ -70,19 +70,33 @@ export class AdvertRepository extends Repository<Advert> {
   }
 
   async createAdvert(userId: string, data: CreateAdvertDTO) {
-    const user = await this.userRepository.findOneBy({});
-    const exchangeRate = await this.exchangeRateService.fetchExchangeRates();
-    console.log(exchangeRate);
-    const calculatedPrices = {
-      priceUAH: data.priceUAH || (data.priceUSD || data.priceEUR) * exchangeRate,
-      priceUSD: data.priceUSD || (data.priceUAH || data.priceEUR) / exchangeRate,
-      priceEUR: data.priceEUR || (data.priceUAH || data.priceUSD) / exchangeRate,
+    const user = await this.userRepository.findOneBy({ id: userId });
+    const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
+    console.log(exchangeRates);
+    const rates = exchangeRates.map((rate) => rate.sale);
+    // const calculatedPrices = {
+    //   priceUAH: data.priceUAH,
+    //   priceUSD:
+    //     data.priceUSD ||
+    //     (data.priceUAH || data.priceEUR) / exchangeRate[1].sale,
+    //   priceEUR:
+    //     data.priceEUR ||
+    //     (data.priceUAH || data.priceUSD) / exchangeRate[0].sale,
+    // };
+    const calculatedPriceUSD = {
+      rate: rates[1],
+      price: data.priceUAH / rates[1],
     };
+    const calculatedPriceEUR = {
+      rate: rates[0],
+      price: data.priceUAH / rates[0],
+    };
+
     const newAdvert = this.create({
       ...data,
-      calculatedPrices,
-      exchangeRate,
-      // userSpecifiedPrice: data.priceUAH,
+      priceEUR: calculatedPriceEUR,
+      priceUSD: calculatedPriceUSD,
+      userSpecifiedPrice: data.priceUAH,
     });
     return await this.save({ newAdvert, user: user });
   }

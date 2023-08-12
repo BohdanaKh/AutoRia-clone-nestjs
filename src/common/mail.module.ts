@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as process from 'process';
 
 import { MailService } from './mail/mail.service';
-import process from 'process';
 
-dotenv.config();
+
+
 @Module({
   imports: [
     MailerModule.forRoot({

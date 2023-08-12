@@ -3,7 +3,6 @@ import {
   Entity,
   JoinColumn,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -17,7 +16,10 @@ export class User {
   @Column({ type: 'varchar', nullable: false })
   userName: string;
 
-  @Column({ type: 'varchar', nullable: false, unique: true })
+  @Column('text', {
+    unique: true,
+    nullable: false,
+  })
   email: string;
 
   @Column({ type: 'boolean', default: true })
@@ -26,18 +28,14 @@ export class User {
   @Column({ type: 'int', nullable: true })
   age: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', select: false, nullable: true })
   password: string;
 
-  @Column({ default: 'User' })
+  @Column({ default: 'User', nullable: false })
   role: string;
 
   @Column({ default: false, nullable: false })
   isPremium: boolean;
-
-  @OneToOne(() => Advert) //FOR SIMPLE ACCOUNT
-  @JoinColumn()
-  advert: Advert;
 
   @OneToMany(() => Advert, (entity) => entity.user, { cascade: true }) //FOR PREMIUM ACCOUNT
   @JoinColumn()

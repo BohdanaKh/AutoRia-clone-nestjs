@@ -48,7 +48,9 @@ export class UsersController {
 
   @Post('managers/account/create')
   @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, User))
+  @CheckPolicies((ability: AppAbility) =>
+    ability.can(Action.Create, User),
+  )
   async createManagerAccount(@Req() req: any, @Body() body: UserCreateDto) {
     return this.usersService.createUser(body);
   }
@@ -63,12 +65,20 @@ export class UsersController {
   // getDashboard(@Request() req) {
   //   return req.user;
   // }
+  @UseGuards(AuthGuard())
   @Delete(':userId')
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, User))
   async deleteUserAccount(@Param('userId') userId: string) {
     return this.usersService.delete(userId);
   }
 
+  @UseGuards(AuthGuard())
   @Patch(':userId')
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   async update(@Param('userId') userId: string, @Body() body: UserUpdateDto) {
     return this.usersService.update(+userId, body);
   }

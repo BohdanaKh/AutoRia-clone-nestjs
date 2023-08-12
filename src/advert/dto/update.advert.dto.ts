@@ -15,12 +15,12 @@ export class UpdateAdvertDto {
   @ApiProperty()
   @IsNumber()
   @IsOptional()
-  priceUSD: number;
+  priceUSD: { rate: number; price: number };
 
   @ApiProperty()
   @IsNumber()
   @IsOptional()
-  priceEUR: number;
+  priceEUR: { rate: number; price: number };
 
   // @ApiProperty()
   // @IsEnum(Currency)

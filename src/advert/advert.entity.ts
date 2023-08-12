@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 
 import { User } from '../users/user.entity';
-import Currency from './interface/currency.enum';
 
 @Entity()
 @Unique(['id', 'brand', 'model', 'year'])
@@ -23,11 +22,11 @@ export class Advert {
   @Column({ type: 'int', nullable: false })
   priceUAH: number;
 
-  @Column({ type: 'int', nullable: false })
-  priceUSD: number;
+  @Column({ type: 'simple-json', nullable: false })
+  priceUSD: { rate: number; price: number };
 
-  @Column({ type: 'int', nullable: false })
-  priceEUR: number;
+  @Column({ type: 'simple-json', nullable: false })
+  priceEUR: { rate: number; price: number };
 
   // @Column({ type: 'enum', enum: Currency, nullable: false })
   // currency: Currency;
@@ -35,7 +34,7 @@ export class Advert {
   @Column({ type: 'float' })
   exchangeRate: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', update: false })
   userSpecifiedPrice: number;
 
   @Column({ type: 'varchar', nullable: false })
@@ -75,6 +74,7 @@ export class Advert {
   // @JoinColumn()
   // user: User;
 
-  @ManyToOne(() => User, (user) => user.advert) //FOR PREMIUM
+  @ManyToOne(() => User, (entity) => entity.adverts)//FOR PREMIUM
+
   user: User;
 }

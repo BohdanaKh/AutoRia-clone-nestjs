@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 
-import Currency from './currency.enum';
-
 @Injectable()
 export class ExchangeRateService {
-  async fetchExchangeRates(): Promise<{ [key in Currency]: number }> {
+  async fetchExchangeRates() {
     const response = await axios.get(
       'https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=11',
     );

@@ -47,6 +47,7 @@ export class UserCreateDto {
 
   @ApiProperty()
   @IsEnum(Role)
+  @IsOptional()
   role: Role;
 
   @ApiProperty()

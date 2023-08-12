@@ -11,7 +11,7 @@ import { Advert } from './advert.entity';
 import { AdvertRepository } from './advert.repository';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
 import { UpdateAdvertDto } from './dto/update.advert.dto';
-import { ExchangeRateService } from './interface/exchange-rate.service';
+import { ExchangeRateService } from './exchange-rate.service';
 
 @Injectable()
 export class AdvertService {
@@ -101,13 +101,24 @@ export class AdvertService {
     const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
 
     // Get the latest original prices from the database
-    const originalPrices = await this.adsRepository.find();
+    const adsWithOriginalPrices = await this.adsRepository.find();
 
     // Calculate prices in other currencies and update in the database
-    const updatedPrices = originalPrices.map((advert) => {
-      const exchangeRate = exchangeRates[advert.currency];
-      const calculatedAmount = advert.userSpecifiedPrice * exchangeRate;
-      return { ...advert, calculatedAmount, exchangeRate };
+    const updatedPrices = adsWithOriginalPrices.map((advert) => {
+      const rates = exchangeRates.map((rate) => rate.sale);
+      const calculatedAmountEUR = {
+        rate: rates[0],
+        price: advert.userSpecifiedPrice / rates[0],
+      };
+      const calculatedAmountUSD = {
+        rate: rates[1],
+        price: advert.userSpecifiedPrice / rates[1],
+      };
+      return {
+        ...advert,
+        priceUSD: calculatedAmountUSD,
+        priceEUR: calculatedAmountEUR,
+      };
     });
 
     await this.adsRepository.save(updatedPrices);

@@ -12,6 +12,7 @@ import { Advert } from './advert.entity';
 import { AdvertRepository } from './advert.repository';
 import { AdvertService } from './advert.service';
 import { CarValidationService } from './car-validation.service';
+import { ExchangeRateService } from './exchange-rate.service';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CarValidationService } from './car-validation.service';
     AdvertRepository,
     UsersRepository,
     CarValidationService,
+    ExchangeRateService,
   ],
   controllers: [AdvertController],
 })
