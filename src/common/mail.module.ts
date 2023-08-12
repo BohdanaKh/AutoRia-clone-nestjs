@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 
 import { MailService } from './mail/mail.service';
+import process from 'process';
 
 dotenv.config();
 @Module({
@@ -19,8 +20,8 @@ dotenv.config();
         // secure: false, // Set to true if using SSL
         auth: {
           type: 'login',
-          user: 'dananvm@gmail.com',
-          pass: 'tdwwxkcuhxgsdbuc',
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD,
         },
       },
       defaults: {
