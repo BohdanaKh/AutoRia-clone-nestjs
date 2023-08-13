@@ -28,8 +28,24 @@ export class AdvertService {
   //   return this.adsRepository.createAdvert(userId, data);
   // }
 
-  async createAdvert(data: CreateAdvertDTO, user: User) {
-    return await this.adsRepository.createAdvert(data, user);
+  async createAdvert(data: CreateAdvertDTO, userId: string): Promise<Advert> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
+    const rates = exchangeRates.map((rate) => rate.sale);
+    const calculatedPriceUSD = {
+      rate: rates[1],
+      price: (data.priceUAH / rates[1]).toFixed(2),
+    };
+    const calculatedPriceEUR = {
+      rate: rates[0],
+      price: (data.priceUAH / rates[0]).toFixed(2),
+    };
+    return await this.adsRepository.createAdvert(
+      data,
+      calculatedPriceEUR,
+      calculatedPriceUSD,
+      user,
+    );
   }
   // async createAdvert(data: CreateAdvertDTO) {
   //   return await this.adsRepository.createAdvert(data);

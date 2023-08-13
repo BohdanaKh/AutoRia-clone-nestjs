@@ -57,7 +57,7 @@ export class AdvertController {
     @Req() req: any,
     @Param('userId') userId: string,
     @Body() body: CreateAdvertDTO,
-  ) {
+  ): Promise<Advert> {
     const user = await this.userRepository.findOneBy({ id: userId });
     console.log(user);
     if (user.account !== Account.PREMIUM) {
@@ -79,19 +79,18 @@ export class AdvertController {
             `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
           );
         }
-        return await this.advertService.createAdvert(body, user);
+        return await this.advertService.createAdvert(body, userId);
       } else {
-        return {
-          message:
-            'Advertisement creation limit reached. Premium account required for advertisement creation.',
-        };
+        throw new BadRequestException(
+          'Advertisement creation limit reached. Premium account required for advertisement creation.',
+        );
       }
     } else {
       const selectedBrand = body.brand;
 
       if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
         await this.mailService.send(
-          'dananvm@gmail.com',
+          'admin@example.com',
           'Missing Car Brand Notification',
           MailTemplate.MISSING_BRAND_NOTIFICATION,
           { selectedBrand },
@@ -100,7 +99,7 @@ export class AdvertController {
           `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
         );
       }
-      return await this.advertService.createAdvert(body, user);
+      return await this.advertService.createAdvert(body, userId);
     }
   }
 

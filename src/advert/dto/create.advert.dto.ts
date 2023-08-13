@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  // IsBoolean,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 import IsNotProfanity from '../../common/decorators/censor-bad-words.decorator';
 
@@ -20,15 +14,9 @@ export class CreateAdvertDTO {
   @IsNotEmpty()
   priceUAH: number;
 
-  // @ApiProperty()
-  // @IsNumber()
-  // @IsOptional()
-  // priceUSD: number;
-  //
-  // @ApiProperty()
-  // @IsNumber()
-  // @IsOptional()
-  // priceEUR: number;
+  priceUSD: { rate: number; price: number };
+
+  priceEUR: { rate: number; price: number };
 
   @ApiProperty()
   @IsString()
@@ -79,16 +67,10 @@ export class CreateAdvertDTO {
 
   @ApiProperty()
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   @IsNotProfanity('photo')
   photo: string;
 
-  // @ApiProperty()
-  // @IsOptional()
-  // views: Date[];
-  //
-  // @ApiProperty()
-  // @IsBoolean()
-  // @IsOptional()
-  // isPublished: boolean;
+  views: Date[];
+  isPublished: boolean;
 }

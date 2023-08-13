@@ -4,19 +4,12 @@ import { DataSource, Repository } from 'typeorm';
 
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
 import { User } from '../users/user.entity';
-import { UsersRepository } from '../users/users.repository';
 import { Advert } from './advert.entity';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
-// import { CreateAdvertDTO } from './dto/create.advert.dto';
-import { ExchangeRateService } from './exchange-rate.service';
 
 @Injectable()
 export class AdvertRepository extends Repository<Advert> {
-  constructor(
-    private readonly dataSource: DataSource,
-    private readonly userRepository: UsersRepository,
-    private readonly exchangeRateService: ExchangeRateService,
-  ) {
+  constructor(private readonly dataSource: DataSource) {
     super(Advert, dataSource.manager);
   }
 
@@ -69,37 +62,37 @@ export class AdvertRepository extends Repository<Advert> {
     };
   }
 
-  async createAdvert(data: CreateAdvertDTO, user: User) {
+  async createAdvert(
+    data: CreateAdvertDTO,
+    calculatedPriceEUR,
+    calculatedPriceUSD,
+    user,
+  ) {
     console.log(data);
     // await this.userRepository.findOneBy({ id: user.id });
-    const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
-    const rates = exchangeRates.map((rate) => rate.sale);
-    const calculatedPriceUSD = {
-      rate: rates[1],
-      price: (data.priceUAH / rates[1]).toFixed(2),
-    };
-    const calculatedPriceEUR = {
-      rate: rates[0],
-      price: (data.priceUAH / rates[0]).toFixed(2),
-    };
-    console.log(data);
-    // const newAdvert = this.create({
-    //   ...data,
-    //   priceEUR: calculatedPriceEUR,
-    //   priceUSD: calculatedPriceUSD,
-    //   userSpecifiedPrice: data.priceUAH,
+
+    // data.priceUSD = calculatedPriceUSD;
+    // data.priceEUR = calculatedPriceEUR;
+
+    // console.log(data);
+    // const newAdvert = new Advert();
+    //   newAdvert.priceEUR = calculatedPriceEUR;
+    //   newAdvert.priceUSD = calculatedPriceUSD,
+    //   .exchangeRate = 2,
+    //   .userSpecifiedPrice = data.priceUAH,
     // });
     // console.log(newAdvert);
-    // return await this.save({ newAdvert, user });
+    // return await this.save(newAdvert);
     return await this.save({
       ...data,
       priceUSD: calculatedPriceUSD,
       priceEUR: calculatedPriceEUR,
       exchangeRate: 4,
       userSpecifiedPrice: data.priceUAH,
-      user,
+      user: user.id,
     });
   }
+
   // async createAdvert(data) {
   //   return await this.save({
   //     ...data,
