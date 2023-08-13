@@ -24,17 +24,16 @@ export class AdvertService {
     private readonly exchangeRateService: ExchangeRateService,
   ) {}
 
-  async getUserAdsCount(user): Promise<number> {
-    return await this.adsRepository.countBy({ user: user });
-  }
-
   // async createAdvert(userId: string, data: CreateAdvertDTO): Promise<Advert> {
   //   return this.adsRepository.createAdvert(userId, data);
   // }
 
-  async createAdvert(data: CreateAdvertDTO, user) {
-    // return await this.adsRepository.save({ ...data, userId: userId });
-    return await this.adsRepository.save({ ...data, user });
+  async createAdvert(data: CreateAdvertDTO, user: User) {
+    return await this.adsRepository.createAdvert(data, user);
+  }
+
+  async getAllAds(query: PublicAdvertInfoDto): Promise<PaginatedDto<Advert>> {
+    return await this.adsRepository.getAllAds(query);
   }
 
   async getAdvertWithUser(advertId: number): Promise<Advert> {
@@ -47,26 +46,8 @@ export class AdvertService {
     return advert;
   }
 
-  // async getFilteredAdverts(filterAdvertDTO: FilterAdvertDto): Promise<any> {
-  //   const { category, search } = filterAdvertDTO;
-  //   let adverts = await this.getAllAdverts();
-  //
-  //   if (search) {
-  //     adverts = adverts.filter(
-  //       (advert) =>
-  //         advert.name.includes(search) || advert.description.includes(search),
-  //     );
-  //   }
-  //
-  //   if (category) {
-  //     adverts = adverts.filter((advert) => advert.category === category);
-  //   }
-  //
-  //   return adverts;
-  // }
-  //
-  async getAllAds(query: PublicAdvertInfoDto): Promise<PaginatedDto<Advert>> {
-    return await this.adsRepository.getAllAds(query);
+  async getUserAdsCount(user): Promise<number> {
+    return await this.adsRepository.countBy({ user: user });
   }
 
   async updateAdvert(advertId: string, updateAdvertDTO: UpdateAdvertDto) {
@@ -97,12 +78,12 @@ export class AdvertService {
   async getViewsPerMonth(advertId: string): Promise<number> {
     return this.adsRepository.countViewsPerTimeframe(advertId, 'month');
   }
-  async getAveragePriceByRegion(advertId: string): Promise<any> {
-    await this.adsRepository.getAveragePriceByRegion(advertId);
+  async getAveragePriceByRegion(query: PublicAdvertInfoDto): Promise<number> {
+    return await this.adsRepository.getAveragePriceByRegion(query);
   }
 
-  async getAveragePriceOfCars(): Promise<number> {
-    return this.adsRepository.getAveragePrice();
+  async getAveragePrice(query: PublicAdvertInfoDto): Promise<number> {
+    return await this.adsRepository.getAveragePrice(query);
   }
   // async calculateAndUpdatePrices() {
   //   // Fetch exchange rates from the bank's API

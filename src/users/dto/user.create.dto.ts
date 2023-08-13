@@ -9,7 +9,8 @@ import {
   Matches,
 } from 'class-validator';
 
-import Role from '../roles/user.role.enum';
+import Role from '../enum/user.role.enum';
+import { Account } from "../enum/account-type.enum";
 
 export class UserCreateDto {
   @ApiProperty()
@@ -50,8 +51,8 @@ export class UserCreateDto {
   @IsOptional()
   role: Role;
 
-  @ApiProperty()
-  @IsOptional()
-  @IsBoolean()
-  isPremium: boolean;
+  // @ApiProperty()
+  // @IsEnum(Account)
+  // @IsOptional()
+  // account: Account;
 }

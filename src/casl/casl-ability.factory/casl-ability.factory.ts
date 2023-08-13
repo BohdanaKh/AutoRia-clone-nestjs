@@ -8,11 +8,14 @@ import {
 import { Injectable } from '@nestjs/common';
 
 import { Advert } from '../../advert/advert.entity';
-import Role from '../../users/roles/user.role.enum';
+import Role from '../../users/enum/user.role.enum';
+import { Manager } from '../../users/manager.entity';
 import { User } from '../../users/user.entity';
 import { Action } from '../action.enum';
 
-type Subjects = InferSubjects<typeof Advert | typeof User> | 'all';
+type Subjects =
+  | InferSubjects<typeof Advert | typeof User | typeof Manager>
+  | 'all';
 
 export type AppAbility = Ability<[Action, Subjects]>;
 
@@ -40,11 +43,11 @@ export class CaslAbilityFactory {
       switch (user.role) {
         case Role.Admin:
           can(Action.Manage, 'all');
-          can(Action.Create, User, { role: 'Manager' });
+          can(Action.Create, Manager);
           break;
         case Role.Manager:
           can(Action.Manage, 'all');
-          cannot(Action.Create, User, { role: 'Manager' });
+          cannot(Action.Create, Manager);
           break;
         case Role.User:
           can(Action.Create && Action.Update && Action.Delete, Advert);

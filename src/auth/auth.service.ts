@@ -33,13 +33,15 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    if (!(await this.compareHash(data.password, findUser.password))) {
+    const { password, ...result } = findUser;
+    console.log(password);
+    if (!(await this.compareHash(data.password, password))) {
       throw new HttpException(
         'Email or password is not correct',
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const token = await this.singInUser(findUser);
+    const token = await this.signIn(result);
 
     return { token };
   }
@@ -56,21 +58,21 @@ export class AuthService {
       });
 
       const tokenPayload = result.getPayload();
-      const token = await this.singInUser({ id: tokenPayload.sub });
+      const token = await this.signInUser({ id: tokenPayload.sub });
       return { token };
     } catch (e) {
       throw new HttpException('Google auth failed', HttpStatus.UNAUTHORIZED);
     }
   }
   async signIn(data: JWTPayload): Promise<string> {
-    return this.jwtService.sign(data);
+    return this.jwtService.signAsync(data);
   }
 
   async validateUser(data: JWTPayload): Promise<User> {
     const user = await this.userRepository.findOne({
       where: {
         id: data.id,
-        // role: data.role,
+        role: data.role,
       },
     });
     if (!user) {
@@ -104,7 +106,7 @@ export class AuthService {
     }
   }
 
-  async singInUser(user) {
+  async signInUser(user) {
     return await this.signIn({
       id: user.id,
     });

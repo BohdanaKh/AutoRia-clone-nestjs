@@ -16,27 +16,24 @@ import { User } from '../users/user.entity';
 export class Advert {
   @PrimaryGeneratedColumn()
   id: number;
-  //
-  // @Column({ type: 'int', nullable: false })
-  // year: number;
+
+  @Column({ type: 'int', nullable: false })
+  year: number;
 
   @Column({ type: 'int', nullable: false })
   priceUAH: number;
 
-  // @Column({ type: 'simple-json' })
-  // priceUSD: { rate: number; price: number };
-  //
-  // @Column({ type: 'simple-json' })
-  // priceEUR: { rate: number; price: number };
+  @Column({ type: 'simple-json' })
+  priceUSD: { rate: number; price: number };
 
-  // @Column({ type: 'enum', enum: Currency, nullable: false })
-  // currency: Currency;
+  @Column({ type: 'simple-json' })
+  priceEUR: { rate: number; price: number };
 
-  // @Column({ type: 'float' })
-  // exchangeRate: number;
-  //
-  // @Column({ type: 'float', update: false })
-  // userSpecifiedPrice: number;
+  @Column({ type: 'float' })
+  exchangeRate: number;
+
+  @Column({ type: 'float', update: false })
+  userSpecifiedPrice: number;
 
   @Column({ type: 'varchar', nullable: false })
   categories: string;

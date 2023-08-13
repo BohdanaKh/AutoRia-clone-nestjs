@@ -22,9 +22,11 @@ import {
   PaginatedDto,
 } from '../common/pagination/response';
 import { PublicUserInfoDto } from '../common/query/user.query.dto';
+import { ManagerCreateDto } from './dto/manager.create.dto';
 import { UserCreateDto } from './dto/user.create.dto';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { PublicUserData } from './interface/user.interface';
+import { Manager } from './manager.entity';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
@@ -46,12 +48,16 @@ export class UsersController {
     return this.usersService.createUser(body);
   }
 
+  @UseGuards(AuthGuard())
   @Post('managers/account/create')
   @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, User))
-  async createManagerAccount(@Req() req: any, @Body() body: UserCreateDto) {
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Manager))
+  async createManagerAccount(@Req() req: any, @Body() body: ManagerCreateDto) {
     return this.usersService.createUser(body);
   }
+
+  @UseGuards(AuthGuard())
+  // @ApiBearerAuth()
   @Get(':userId')
   async getUserProfile(@Param('userId') id: string) {
     return this.usersService.getOneUser(id);
@@ -71,6 +77,7 @@ export class UsersController {
     return this.usersService.delete(userId);
   }
 
+  // @ApiBearerAuth()
   @UseGuards(AuthGuard())
   @Patch(':userId')
   @UseGuards(PoliciesGuard)

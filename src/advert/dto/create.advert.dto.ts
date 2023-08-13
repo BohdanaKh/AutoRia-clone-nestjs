@@ -10,30 +10,25 @@ import {
 import IsNotProfanity from '../../common/decorators/censor-bad-words.decorator';
 
 export class CreateAdvertDTO {
-  // @ApiProperty()
-  // @IsNumber()
-  // @IsNotEmpty()
-  // year: number;
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  year: number;
 
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
   priceUAH: number;
 
-  // @ApiProperty()
-  // @IsNumber()
-  // @IsOptional()
-  // priceUSD: number;
-  //
-  // @ApiProperty()
-  // @IsNumber()
-  // @IsOptional()
-  // priceEUR: number;
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  priceUSD: number;
 
-  // @ApiProperty()
-  // @IsEnum(Currency)
-  // @IsNotEmpty()
-  // currency: Currency;
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  priceEUR: number;
 
   @ApiProperty()
   @IsString()

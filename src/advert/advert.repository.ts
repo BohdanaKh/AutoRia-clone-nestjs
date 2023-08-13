@@ -3,6 +3,7 @@ import * as dayjs from 'dayjs';
 import { DataSource, Repository } from 'typeorm';
 
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
+import { User } from '../users/user.entity';
 import { UsersRepository } from '../users/users.repository';
 import { Advert } from './advert.entity';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
@@ -41,22 +42,19 @@ export class AdvertRepository extends Repository<Advert> {
       });
     }
 
-    // switch (query.sort) {
-    //   case 'brand':
-    //     queryBuilder.orderBy('advert.brand', query.order);
-    //     break;
-    //   case 'year':
-    //     queryBuilder.orderBy('advert.year', query.order);
-    //     break;
-    //   case 'city':
-    //     queryBuilder.orderBy('advert.city', query.order);
-    //     break;
-    //   // case 'animalName':
-    //   //   queryBuilder.orderBy('animal.name', query.order);
-    //   //   break;
-    //   default:
-    //     queryBuilder.orderBy('advert.id', query.order);
-    // }
+    switch (query.sort) {
+      case 'brand':
+        queryBuilder.orderBy('advert.brand', query.order);
+        break;
+      case 'year':
+        queryBuilder.orderBy('advert.year', query.order);
+        break;
+      case 'priceUAH':
+        queryBuilder.orderBy('advert.priceUAH', query.order);
+        break;
+      default:
+        queryBuilder.orderBy('advert.region', query.order);
+    }
     queryBuilder.limit(limit);
     queryBuilder.offset(offset);
     const [entities, count] = await queryBuilder.getManyAndCount();
@@ -69,35 +67,34 @@ export class AdvertRepository extends Repository<Advert> {
     };
   }
 
-  // async createAdvert(userId: string, data: CreateAdvertDTO) {
-  //   console.log(data);
-  //   const user = await this.userRepository.findOneBy({ id: userId });
-    // const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
-    // const rates = exchangeRates.map((rate) => rate.sale);
-    // const calculatedPriceUSD = {
-    //   rate: rates[1],
-    //   price: data.priceUAH / rates[1],
-    // };
-    // const calculatedPriceEUR = {
-    //   rate: rates[0],
-    //   price: data.priceUAH / rates[0],
-    // };
-    // console.log(data);
-    // const newAdvert = this.create({
-    //   ...data,
-    //   priceEUR: calculatedPriceEUR,
-    //   priceUSD: calculatedPriceUSD,
-    //   userSpecifiedPrice: data.priceUAH,
-    // });
-    // console.log(newAdvert);
-    // return await this.save({ newAdvert, user: user });
-  //   return await this.save({ data, user: user });
-  // }
+  async createAdvert(data: CreateAdvertDTO, user: User) {
+    console.log(data);
+    await this.userRepository.findOneBy({ id: user.id });
+    const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
+    const rates = exchangeRates.map((rate) => rate.sale);
+    const calculatedPriceUSD = {
+      rate: rates[1],
+      price: data.priceUAH / rates[1],
+    };
+    const calculatedPriceEUR = {
+      rate: rates[0],
+      price: data.priceUAH / rates[0],
+    };
+    console.log(data);
+    const newAdvert = this.create({
+      ...data,
+      priceEUR: calculatedPriceEUR,
+      priceUSD: calculatedPriceUSD,
+      userSpecifiedPrice: data.priceUAH,
+    });
+    console.log(newAdvert);
+    return await this.save({ newAdvert, user: user });
+  }
 
-  //   async findOne(advertId) {
-  //     const user = await this.userRepository.findOneBy({});
-  //     return await this.findOne({ advertId, user: user });
-
+  async findOne(advertId) {
+    // const user = await this.userRepository.findOneBy();
+    return await this.findOne({ advertId, user: User });
+  }
   async countAllViews(advertId): Promise<number> {
     const advert = await this.findOneBy(advertId);
     let totalViews = 0;
@@ -126,18 +123,19 @@ export class AdvertRepository extends Repository<Advert> {
     return viewsCount;
   }
 
-  async getAveragePriceByRegion(advertId): Promise<any> {
-    return await this.createQueryBuilder('advert', advertId)
-      .select('advert.region', 'region')
-      .addSelect('AVG(advert.priceUAH)', 'averagePrice')
-      .groupBy('advert.region')
-      .getRawMany();
-  }
-  async getAveragePrice(): Promise<number> {
-    const result = await this.createQueryBuilder('advert')
+  async getAveragePriceByRegion(query: PublicAdvertInfoDto): Promise<number> {
+    return await this.createQueryBuilder('advert')
+      .where('advert.brand AND advert.region', {
+        brand: query.brand,
+        region: query.region,
+      })
       .select('AVG(advert.priceUAH)', 'averagePrice')
       .getRawOne();
-
-    return result.averagePrice || 0;
+  }
+  async getAveragePrice(query: PublicAdvertInfoDto): Promise<number> {
+    return await this.createQueryBuilder('advert')
+      .where('advert.brand = :brand', { brand: query.brand })
+      .select('AVG(advert.priceUAH)', 'averagePrice')
+      .getRawOne();
   }
 }

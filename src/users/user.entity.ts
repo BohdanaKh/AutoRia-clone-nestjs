@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 
 import { Advert } from '../advert/advert.entity';
+import { Account } from './enum/account-type.enum';
 
 @Entity()
 export class User {
@@ -34,8 +35,8 @@ export class User {
   @Column({ default: 'User', nullable: false })
   role: string;
 
-  @Column({ default: false, nullable: false })
-  isPremium: boolean;
+  @Column({ type: 'enum', default: Account.BASE, nullable: false })
+  account: Account;
 
   @OneToMany(() => Advert, (entity) => entity.user) //FOR PREMIUM ACCOUNT
   @JoinColumn()

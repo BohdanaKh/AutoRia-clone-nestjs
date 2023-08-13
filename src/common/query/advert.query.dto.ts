@@ -5,7 +5,7 @@ export class PublicAdvertInfoDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @IsEnum(['brand', 'year', 'city'])
+  @IsEnum(['brand', 'year', 'region', 'priceUAH'])
   sort: string;
 
   @ApiProperty()
@@ -37,7 +37,12 @@ export class PublicAdvertInfoDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  city: string;
+  brand: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  region: string;
 
   @ApiProperty()
   @IsString()

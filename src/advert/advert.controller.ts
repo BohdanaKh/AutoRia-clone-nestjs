@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,10 +21,10 @@ import { Action } from '../casl/action.enum';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { CheckPolicies } from '../casl/check-policy.decorator';
 import { PoliciesGuard } from '../casl/policies.guard';
-import { IsPremium } from '../common/decorators/isPremium.decorator';
 import { MailTemplate } from '../common/mail/mail.interface';
 import { MailService } from '../common/mail/mail.service';
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
+import { Account } from '../users/enum/account-type.enum';
 import { User } from '../users/user.entity';
 import { Advert } from './advert.entity';
 import { AdvertService } from './advert.service';
@@ -48,7 +49,7 @@ export class AdvertController {
   }
 
   @Post('create/:userId')
-  // @UseGuards(PoliciesGuard)
+  @UseGuards(AuthGuard())
   // @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Advert))
   async createAdvert(
     @Param('userId') userId: string,
@@ -56,9 +57,7 @@ export class AdvertController {
   ) {
     const user = await this.userRepository.findOneBy({ id: userId });
     console.log(user);
-    const isPremium = user.isPremium;
-    console.log(isPremium);
-    if (isPremium === false) {
+    if (user.account !== Account.PREMIUM) {
       const adsLimit = 1;
       const adsCount = await this.advertService.getUserAdsCount(user);
 
@@ -107,6 +106,7 @@ export class AdvertController {
     return this.advertService.getAdvertWithUser(+advertId);
   }
 
+  @UseGuards(AuthGuard())
   @Delete(':advertId')
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Advert))
@@ -124,63 +124,100 @@ export class AdvertController {
     return this.advertService.updateAdvert(advertId, body);
   }
 
+  @UseGuards(AuthGuard())
   @Get(':userId/:advertId/views')
   async getViews(
     @Param('userId') userId: string,
-    @IsPremium() isPremium: boolean,
     @Param('advertId') advertId: string,
   ) {
-    const entity = await this.userRepository.findOneBy({ id: userId });
-    if (entity.isPremium) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user.account === Account.PREMIUM) {
       return this.advertService.getViews(advertId);
     } else {
-      return 'Access denied. Premium account required.';
+      throw new HttpException(
+        'Access denied. Premium account required.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
+  @UseGuards(AuthGuard())
   @Get(':userId/:advertId/views_per_day')
   async getViewsPerDay(
     @Param('userId') userId: string,
-    @IsPremium() isPremium: boolean,
     @Param('advertId') advertId: string,
   ) {
-    const entity = await this.userRepository.findOneBy({ id: userId });
-    if (entity.isPremium) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user.account === Account.PREMIUM) {
       return this.advertService.getViewsPerDay(advertId);
+    } else {
+      throw new HttpException(
+        'Access denied. Premium account required.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
+  @UseGuards(AuthGuard())
+  @Get(':userId/:advertId/views_per_week')
+  async getViewsPerWeek(
+    @Param('userId') userId: string,
+    @Param('advertId') advertId: string,
+  ) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user.account === Account.PREMIUM) {
+      return this.advertService.getViewsPerWeek(advertId);
+    } else {
+      throw new HttpException(
+        'Access denied. Premium account required.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @UseGuards(AuthGuard())
   @Get('userId/:advertId/views_per_month')
   async getViewsPerMonth(
     @Param('userId') userId: string,
-    @IsPremium() isPremium: boolean,
     @Param('advertId') advertId: string,
   ) {
-    if (isPremium) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user.account === Account.PREMIUM) {
       return this.advertService.getViewsPerMonth(advertId);
+    } else {
+      throw new HttpException(
+        'Access denied. Premium account required.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
-  @Get(':userId/:advertId/average_price_by_region')
+  @UseGuards(AuthGuard())
+  @Get(':userId/average_price_by_region')
   async getAverageCarPriceByRegion(
     @Param('userId') userId: string,
-    @Param('advertId') advertId: string,
+    @Query() query: PublicAdvertInfoDto,
   ) {
-    const entity = await this.userRepository.findOneBy({ id: userId });
-    if (entity.isPremium) {
-      return this.advertService.getAveragePriceByRegion(advertId);
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user.account === Account.PREMIUM) {
+      return this.advertService.getAveragePriceByRegion(query);
     } else {
-      return 'Access denied. Premium account required.';
+      throw new HttpException(
+        'Access denied. Premium account required.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
+  @UseGuards(AuthGuard())
   @Get(':userId/average_price')
-  async getAveragePriceOfCars(
+  async getAveragePrice(
     @Param('userId') userId: string,
+    @Query() query: PublicAdvertInfoDto,
   ): Promise<number> {
-    const entity = await this.userRepository.findOneBy({ id: userId });
-    if (entity.isPremium) {
-      return await this.advertService.getAveragePriceOfCars();
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user.account === Account.PREMIUM) {
+      return await this.advertService.getAveragePrice(query);
     } else {
       throw new HttpException(
         'Access denied. Premium account required.',
