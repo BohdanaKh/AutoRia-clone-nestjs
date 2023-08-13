@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CaslModule } from '../casl/casl.module';
@@ -16,6 +17,11 @@ import { ExchangeRateService } from './exchange-rate.service';
 
 @Module({
   imports: [
+    PassportModule.register({
+      defaultStrategy: 'bearer',
+      property: 'user',
+      session: false,
+    }),
     TypeOrmModule.forFeature([Advert, User]),
     UsersModule,
     CaslModule,

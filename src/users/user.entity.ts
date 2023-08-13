@@ -35,10 +35,14 @@ export class User {
   @Column({ default: 'User', nullable: false })
   role: string;
 
-  @Column({ type: 'enum', default: Account.BASE, nullable: false })
+  @Column({
+    type: 'enum',
+    enum: Account,
+    default: Account.BASE,
+  })
   account: Account;
 
-  @OneToMany(() => Advert, (entity) => entity.user) //FOR PREMIUM ACCOUNT
+  @OneToMany(() => Advert, (entity) => entity.user)T
   @JoinColumn()
   adverts: Advert;
 }

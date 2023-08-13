@@ -9,13 +9,10 @@ import { Injectable } from '@nestjs/common';
 
 import { Advert } from '../../advert/advert.entity';
 import Role from '../../users/enum/user.role.enum';
-import { Manager } from '../../users/manager.entity';
 import { User } from '../../users/user.entity';
 import { Action } from '../action.enum';
 
-type Subjects =
-  | InferSubjects<typeof Advert | typeof User | typeof Manager>
-  | 'all';
+type Subjects = InferSubjects<typeof Advert | typeof User> | 'all';
 
 export type AppAbility = Ability<[Action, Subjects]>;
 
@@ -41,19 +38,20 @@ export class CaslAbilityFactory {
 
     if (user) {
       switch (user.role) {
-        case Role.Admin:
+        case Role.ADMIN:
           can(Action.Manage, 'all');
-          can(Action.Create, Manager);
+          can(Action.Create, User, { role: Role.MANAGER });
           break;
-        case Role.Manager:
+        case Role.MANAGER:
           can(Action.Manage, 'all');
-          cannot(Action.Create, Manager);
+          cannot(Action.Create, User, { role: Role.MANAGER });
           break;
-        case Role.User:
+        case Role.USER:
           can(Action.Create && Action.Update && Action.Delete, Advert);
-          can(Action.Create && Action.Update && Action.Delete, User, {
-            id: user.id,
-          });
+          can(Action.Create && Action.Update, User, { id: user.id });
+          can(Action.Delete, User, { id: user.id });
+
+          cannot(Action.Create, User, { role: Role.MANAGER });
           break;
         default:
           can(Action.Read, 'all');

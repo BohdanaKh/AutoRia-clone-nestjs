@@ -2,9 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  // JoinColumn,
   ManyToOne,
-  // OneToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -17,10 +15,10 @@ export class Advert {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int', nullable: false })
-  year: number;
+  @Column('text', { nullable: true, default: '0000' })
+  year: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: true, default: 1.0 })
   priceUAH: number;
 
   @Column({ type: 'simple-json' })
@@ -35,28 +33,28 @@ export class Advert {
   @Column({ type: 'float', update: false })
   userSpecifiedPrice: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true, default: '' })
   categories: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true, default: '' })
   brand: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true, default: '' })
   model: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true, default: '' })
   modification: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true, default: '' })
   body: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: true, default: 1.0 })
   mileage: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true, default: '' })
   region: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true, default: '' })
   city: string;
 
   @Column({ type: 'varchar' })
@@ -68,11 +66,7 @@ export class Advert {
   @Column({ type: 'boolean', default: true })
   isPublished: boolean;
 
-  // @OneToOne(() => User)
-  // @JoinColumn()
-  // user: User;
-
-  @ManyToOne(() => User, (entity) => entity.adverts) //FOR PREMIUM
+  @ManyToOne(() => User, (entity) => entity.adverts)
   @JoinColumn()
   user: User;
 }

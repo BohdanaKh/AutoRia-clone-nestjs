@@ -10,10 +10,11 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -48,10 +49,12 @@ export class AdvertController {
     return this.advertService.getAllAds(query);
   }
 
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreateAdvertDTO })
   @Post('create/:userId')
   @UseGuards(AuthGuard())
-  // @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Advert))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Advert))
   async createAdvert(
+    @Req() req: any,
     @Param('userId') userId: string,
     @Body() body: CreateAdvertDTO,
   ) {
@@ -67,7 +70,7 @@ export class AdvertController {
 
         if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
           await this.mailService.send(
-            'dananvm@gmail.com',
+            'admin@example.com',
             'Missing Car Brand Notification',
             MailTemplate.MISSING_BRAND_NOTIFICATION,
             { selectedBrand },
@@ -76,7 +79,7 @@ export class AdvertController {
             `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
           );
         }
-        return this.advertService.createAdvert(body, user);
+        return await this.advertService.createAdvert(body, user);
       } else {
         return {
           message:
@@ -97,7 +100,7 @@ export class AdvertController {
           `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
         );
       }
-      return this.advertService.createAdvert(body, user);
+      return await this.advertService.createAdvert(body, user);
     }
   }
 

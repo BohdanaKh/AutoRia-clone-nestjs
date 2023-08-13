@@ -7,6 +7,7 @@ import { User } from '../users/user.entity';
 import { UsersRepository } from '../users/users.repository';
 import { Advert } from './advert.entity';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
+// import { CreateAdvertDTO } from './dto/create.advert.dto';
 import { ExchangeRateService } from './exchange-rate.service';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class AdvertRepository extends Repository<Advert> {
   }
 
   public async getAllAds(query: PublicAdvertInfoDto) {
+    query.sort = query.sort || 'id';
     query.order = query.order || 'ASC';
     const page = +query.page || 1;
     const limit = +query.limit || 2;
@@ -42,19 +44,19 @@ export class AdvertRepository extends Repository<Advert> {
       });
     }
 
-    switch (query.sort) {
-      case 'brand':
-        queryBuilder.orderBy('advert.brand', query.order);
-        break;
-      case 'year':
-        queryBuilder.orderBy('advert.year', query.order);
-        break;
-      case 'priceUAH':
-        queryBuilder.orderBy('advert.priceUAH', query.order);
-        break;
-      default:
-        queryBuilder.orderBy('advert.region', query.order);
-    }
+    // switch (query.sort) {
+    //   case 'brand':
+    //     queryBuilder.orderBy('advert.brand', query.order);
+    //     break;
+    //   case 'year':
+    //     queryBuilder.orderBy('advert.year', query.order);
+    //     break;
+    //   case 'priceUAH':
+    //     queryBuilder.orderBy('advert.priceUAH', query.order);
+    //     break;
+    //   default:
+    //     queryBuilder.orderBy('advert.region', query.order);
+    // }
     queryBuilder.limit(limit);
     queryBuilder.offset(offset);
     const [entities, count] = await queryBuilder.getManyAndCount();
@@ -69,28 +71,44 @@ export class AdvertRepository extends Repository<Advert> {
 
   async createAdvert(data: CreateAdvertDTO, user: User) {
     console.log(data);
-    await this.userRepository.findOneBy({ id: user.id });
+    // await this.userRepository.findOneBy({ id: user.id });
     const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
     const rates = exchangeRates.map((rate) => rate.sale);
     const calculatedPriceUSD = {
       rate: rates[1],
-      price: data.priceUAH / rates[1],
+      price: (data.priceUAH / rates[1]).toFixed(2),
     };
     const calculatedPriceEUR = {
       rate: rates[0],
-      price: data.priceUAH / rates[0],
+      price: (data.priceUAH / rates[0]).toFixed(2),
     };
     console.log(data);
-    const newAdvert = this.create({
+    // const newAdvert = this.create({
+    //   ...data,
+    //   priceEUR: calculatedPriceEUR,
+    //   priceUSD: calculatedPriceUSD,
+    //   userSpecifiedPrice: data.priceUAH,
+    // });
+    // console.log(newAdvert);
+    // return await this.save({ newAdvert, user });
+    return await this.save({
       ...data,
-      priceEUR: calculatedPriceEUR,
       priceUSD: calculatedPriceUSD,
+      priceEUR: calculatedPriceEUR,
+      exchangeRate: 4,
       userSpecifiedPrice: data.priceUAH,
+      user,
     });
-    console.log(newAdvert);
-    return await this.save({ newAdvert, user: user });
   }
-
+  // async createAdvert(data) {
+  //   return await this.save({
+  //     ...data,
+  //     priceUSD: 1,
+  //     priceEUR: 2,
+  //     exchangeRate: 14,
+  //     userSpecifiedPrice: 4,
+  //   });
+  // }
   async findOne(advertId) {
     // const user = await this.userRepository.findOneBy();
     return await this.findOne({ advertId, user: User });

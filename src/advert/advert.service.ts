@@ -31,6 +31,9 @@ export class AdvertService {
   async createAdvert(data: CreateAdvertDTO, user: User) {
     return await this.adsRepository.createAdvert(data, user);
   }
+  // async createAdvert(data: CreateAdvertDTO) {
+  //   return await this.adsRepository.createAdvert(data);
+  // }
 
   async getAllAds(query: PublicAdvertInfoDto): Promise<PaginatedDto<Advert>> {
     return await this.adsRepository.getAllAds(query);

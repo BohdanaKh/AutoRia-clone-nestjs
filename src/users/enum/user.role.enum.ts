@@ -1,9 +1,7 @@
 enum Role {
-  Buyer = 'Buyer',
-  User = 'User',
-  Manager = 'Manager',
-  Admin = 'Admin',
-  Dealership = 'Dealership',
+  ADMIN = 'admin',
+  MANAGER = 'manager',
+  USER = 'user',
+  BUYER = 'buyer',
 }
-
 export default Role;

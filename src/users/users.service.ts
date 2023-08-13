@@ -8,8 +8,6 @@ import { UserCreateDto } from './dto/user.create.dto';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { User } from './user.entity';
 import { UsersRepository } from './users.repository';
-import { Manager } from "./manager.entity";
-import { ManagerCreateDto } from "./dto/manager.create.dto";
 import * as bcrypt from "bcrypt";
 
 @Injectable()
@@ -75,12 +73,13 @@ export class UsersService {
 
     return { token };
   }
-  async createManager(data: ManagerCreateDto) {
-    const newUser = await this.usersRepository.createUser(data);
-    const token = await this.authService.signInUser(newUser);
+  // async createManager(data: ManagerCreateDto) {
+  //   const newUser = await this.usersRepository.createUser(data);
+  //   const token = await this.authService.signInUser(newUser);
+  //
+  //   return { token };
+  // }
 
-    return { token };
-  }
   // async createUser(data: UserCreateDto) {
   //   const findUser = await this.usersRepository.findOne({
   //     where: { email: data.email },
@@ -128,7 +127,7 @@ export class UsersService {
   async getOneUser(userId: string) {
     return await this.usersRepository.findOne({
       where: { id: userId },
-      relations: { adverts: true },
+      // relations: { adverts: true },
     });
   }
 
@@ -141,8 +140,5 @@ export class UsersService {
 
   async delete(userId: string) {
     return await this.usersRepository.delete({ id: userId });
-  }
-  async getHash(password: string) {
-    return await bcrypt.hash(password, this.salt);
   }
 }

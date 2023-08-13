@@ -1,19 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { DataSource, Repository } from 'typeorm';
 
 import { PublicUserInfoDto } from '../common/query/user.query.dto';
-import { ManagerCreateDto } from './dto/manager.create.dto';
 import { UserCreateDto } from './dto/user.create.dto';
 import { User } from './user.entity';
-import { UsersService } from './users.service';
 
 @Injectable()
 export class UsersRepository extends Repository<User> {
   private salt = 7;
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly dataSource: DataSource,
-  ) {
+  constructor(private readonly dataSource: DataSource) {
     super(User, dataSource.manager);
   }
   public async getAllUsers(query: PublicUserInfoDto) {
@@ -23,10 +19,11 @@ export class UsersRepository extends Repository<User> {
     const limit = +query.limit || 4;
     const offset = (page - 1) * limit;
 
-    const queryBuilder = this.createQueryBuilder('users').leftJoinAndSelect(
-      'users.adverts',
-      'advert',
-    );
+    // const queryBuilder = this.createQueryBuilder('users').leftJoinAndSelect(
+    //   'users.adverts',
+    //   'advert',
+    // );
+    const queryBuilder = this.createQueryBuilder('users');
 
     if (query.search) {
       queryBuilder.where('"userName" IN(:...search)', {
@@ -79,7 +76,7 @@ export class UsersRepository extends Repository<User> {
         HttpStatus.BAD_REQUEST,
       );
     }
-    data.password = await this.usersService.getHash(data.password);
+    data.password = await this.getHash(data.password);
     return this.save(data);
 
     // const id = v4();
@@ -92,19 +89,20 @@ export class UsersRepository extends Repository<User> {
     // return { token };
   }
 
-  async createManager(data: ManagerCreateDto) {
-    const findUser = await this.findOne({
-      where: { email: data.email },
-    });
-    if (findUser) {
-      throw new HttpException(
-        'User with this email already exists',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    data.password = await this.usersService.getHash(data.password);
-    return this.save(data);
-  }
+  // async createManager(data: ManagerCreateDto) {
+  //   const findUser = await this.findOne({
+  //     where: { email: data.email },
+  //   });
+  //   if (findUser) {
+  //     throw new HttpException(
+  //       'User with this email already exists',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  //   data.password = await this.usersService.getHash(data.password);
+  //   return this.save(data);
+  // }
+
   // async login(data: UserloginDto) {
   //   return await this.findOne({
   //     where: { email: data.email },
@@ -135,4 +133,8 @@ export class UsersRepository extends Repository<User> {
   // async compareHash(password: string, hash: string): Promise<boolean> {
   //   return bcrypt.compare(password, hash);
   // }
+
+  async getHash(password: string) {
+    return await bcrypt.hash(password, this.salt);
+  }
 }

@@ -3,9 +3,9 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateAdvertDto {
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  year: number;
+  year: string;
 
   @ApiProperty()
   @IsNumber()

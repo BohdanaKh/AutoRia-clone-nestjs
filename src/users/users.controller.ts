@@ -2,16 +2,16 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Req,
-  UseGuards,
-} from '@nestjs/common';
+  UseGuards
+} from "@nestjs/common";
 import { AuthGuard } from '@nestjs/passport';
-import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiResponse, ApiTags } from "@nestjs/swagger";
 
 import { Action } from '../casl/action.enum';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
@@ -22,13 +22,12 @@ import {
   PaginatedDto,
 } from '../common/pagination/response';
 import { PublicUserInfoDto } from '../common/query/user.query.dto';
-import { ManagerCreateDto } from './dto/manager.create.dto';
 import { UserCreateDto } from './dto/user.create.dto';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { PublicUserData } from './interface/user.interface';
-import { Manager } from './manager.entity';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
+import { CreateAdvertDTO } from "../advert/dto/create.advert.dto";
 
 @ApiTags('User')
 @ApiExtraModels(PublicUserData, PaginatedDto)
@@ -43,18 +42,21 @@ export class UsersController {
     return this.usersService.getAllUsers(query);
   }
 
+  @ApiResponse({ status: HttpStatus.CREATED, type: UserCreateDto })
   @Post('account/create')
   async createUserAccount(@Req() req: any, @Body() body: UserCreateDto) {
     return this.usersService.createUser(body);
   }
 
-  @UseGuards(AuthGuard())
-  @Post('managers/account/create')
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Manager))
-  async createManagerAccount(@Req() req: any, @Body() body: ManagerCreateDto) {
-    return this.usersService.createUser(body);
-  }
+  // @UseGuards(AuthGuard())
+  // @Post('managers/account/create')
+  // @UseGuards(PoliciesGuard)
+  // @CheckPolicies((ability: AppAbility) =>
+  //   ability.can(Action.Create, User),
+  // )
+  // async createManagerAccount(@Req() req: any, @Body() body: ManagerCreateDto) {
+  //   return this.usersService.createUser(body);
+  // }
 
   @UseGuards(AuthGuard())
   // @ApiBearerAuth()
