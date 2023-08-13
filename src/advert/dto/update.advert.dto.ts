@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateAdvertDto {
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  year: number;
+  // @ApiProperty()
+  // @IsNumber()
+  // @IsOptional()
+  // year: number;
 
   @ApiProperty()
   @IsNumber()

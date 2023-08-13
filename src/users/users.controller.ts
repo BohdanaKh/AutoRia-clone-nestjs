@@ -48,9 +48,7 @@ export class UsersController {
 
   @Post('managers/account/create')
   @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Create, User),
-  )
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, User))
   async createManagerAccount(@Req() req: any, @Body() body: UserCreateDto) {
     return this.usersService.createUser(body);
   }
@@ -75,8 +73,6 @@ export class UsersController {
 
   @UseGuards(AuthGuard())
   @Patch(':userId')
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   async update(@Param('userId') userId: string, @Body() body: UserUpdateDto) {

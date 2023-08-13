@@ -48,6 +48,9 @@ export class CaslAbilityFactory {
           break;
         case Role.User:
           can(Action.Create && Action.Update && Action.Delete, Advert);
+          can(Action.Create && Action.Update && Action.Delete, User, {
+            id: user.id,
+          });
           break;
         default:
           can(Action.Read, 'all');

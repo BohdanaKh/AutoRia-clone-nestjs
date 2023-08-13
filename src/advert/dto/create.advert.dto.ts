@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -9,28 +8,27 @@ import {
 } from 'class-validator';
 
 import IsNotProfanity from '../../common/decorators/censor-bad-words.decorator';
-import Currency from '../interface/currency.enum';
 
 export class CreateAdvertDTO {
-  @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  year: number;
+  // @ApiProperty()
+  // @IsNumber()
+  // @IsNotEmpty()
+  // year: number;
 
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
   priceUAH: number;
 
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  priceUSD: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  priceEUR: number;
+  // @ApiProperty()
+  // @IsNumber()
+  // @IsOptional()
+  // priceUSD: number;
+  //
+  // @ApiProperty()
+  // @IsNumber()
+  // @IsOptional()
+  // priceEUR: number;
 
   // @ApiProperty()
   // @IsEnum(Currency)

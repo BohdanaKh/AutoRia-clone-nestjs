@@ -37,7 +37,7 @@ export class User {
   @Column({ default: false, nullable: false })
   isPremium: boolean;
 
-  @OneToMany(() => Advert, (entity) => entity.user, { cascade: true }) //FOR PREMIUM ACCOUNT
+  @OneToMany(() => Advert, (entity) => entity.user) //FOR PREMIUM ACCOUNT
   @JoinColumn()
-  adverts: Advert[];
+  adverts: Advert;
 }

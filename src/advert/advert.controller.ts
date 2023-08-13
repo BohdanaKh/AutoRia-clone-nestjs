@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -18,10 +20,7 @@ import { Action } from '../casl/action.enum';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { CheckPolicies } from '../casl/check-policy.decorator';
 import { PoliciesGuard } from '../casl/policies.guard';
-import {
-  GetPremiumAccount,
-  Premium,
-} from '../common/decorators/premium.decorator';
+import { IsPremium } from '../common/decorators/isPremium.decorator';
 import { MailTemplate } from '../common/mail/mail.interface';
 import { MailService } from '../common/mail/mail.service';
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
@@ -78,7 +77,7 @@ export class AdvertController {
             `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
           );
         }
-        return this.advertService.createAdvert(userId, body);
+        return this.advertService.createAdvert(body, user);
       } else {
         return {
           message:
@@ -99,7 +98,7 @@ export class AdvertController {
           `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
         );
       }
-      return this.advertService.createAdvert(userId, body);
+      return this.advertService.createAdvert(body, user);
     }
   }
 
@@ -125,51 +124,68 @@ export class AdvertController {
     return this.advertService.updateAdvert(advertId, body);
   }
 
-  @Premium()
   @Get(':userId/:advertId/views')
   async getViews(
-    @GetPremiumAccount() user: any,
+    @Param('userId') userId: string,
+    @IsPremium() isPremium: boolean,
     @Param('advertId') advertId: string,
   ) {
-    if (user && user.isPremium) {
+    const entity = await this.userRepository.findOneBy({ id: userId });
+    if (entity.isPremium) {
       return this.advertService.getViews(advertId);
     } else {
       return 'Access denied. Premium account required.';
     }
   }
 
-  @Premium()
-  @Get(':advertId/views_per_day')
-  async getViewsPerDay(@Param('advertId') advertId: string) {
-    return this.advertService.getViewsPerDay(advertId);
-  }
-
-  @Premium()
-  @Get(':advertId/views_per_week')
-  async getViewsPerWeek(@Param('advertId') advertId: string) {
-    return this.advertService.getViewsPerWeek(advertId);
-  }
-
-  @Premium()
-  @Get(':advertId/views_per_month')
-  async getViewsPerMonth(@Param('advertId') advertId: string) {
-    return this.advertService.getViewsPerMonth(advertId);
-  }
-  @Premium()
-  @Get('average_price_by_region')
-  async getAverageCarPriceByRegion(
-    @GetPremiumAccount() user: any,
+  @Get(':userId/:advertId/views_per_day')
+  async getViewsPerDay(
+    @Param('userId') userId: string,
+    @IsPremium() isPremium: boolean,
     @Param('advertId') advertId: string,
   ) {
-    if (user && user.isPremium) {
+    const entity = await this.userRepository.findOneBy({ id: userId });
+    if (entity.isPremium) {
+      return this.advertService.getViewsPerDay(advertId);
+    }
+  }
+
+  @Get('userId/:advertId/views_per_month')
+  async getViewsPerMonth(
+    @Param('userId') userId: string,
+    @IsPremium() isPremium: boolean,
+    @Param('advertId') advertId: string,
+  ) {
+    if (isPremium) {
+      return this.advertService.getViewsPerMonth(advertId);
+    }
+  }
+
+  @Get(':userId/:advertId/average_price_by_region')
+  async getAverageCarPriceByRegion(
+    @Param('userId') userId: string,
+    @Param('advertId') advertId: string,
+  ) {
+    const entity = await this.userRepository.findOneBy({ id: userId });
+    if (entity.isPremium) {
       return this.advertService.getAveragePriceByRegion(advertId);
     } else {
       return 'Access denied. Premium account required.';
     }
   }
-  @Premium()
-  @Get('average-price')
-  async getAveragePriceOfCars(): Promise<number> {
-    return await this.advertService.getAveragePriceOfCars();
+
+  @Get(':userId/average_price')
+  async getAveragePriceOfCars(
+    @Param('userId') userId: string,
+  ): Promise<number> {
+    const entity = await this.userRepository.findOneBy({ id: userId });
+    if (entity.isPremium) {
+      return await this.advertService.getAveragePriceOfCars();
+    } else {
+      throw new HttpException(
+        'Access denied. Premium account required.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }
