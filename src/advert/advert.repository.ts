@@ -3,7 +3,7 @@ import * as dayjs from 'dayjs';
 import { DataSource, Repository } from 'typeorm';
 
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
-import { User } from '../users/user.entity';
+// import { User } from '../users/user.entity';
 import { Advert } from './advert.entity';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
 
@@ -93,19 +93,6 @@ export class AdvertRepository extends Repository<Advert> {
     });
   }
 
-  // async createAdvert(data) {
-  //   return await this.save({
-  //     ...data,
-  //     priceUSD: 1,
-  //     priceEUR: 2,
-  //     exchangeRate: 14,
-  //     userSpecifiedPrice: 4,
-  //   });
-  // }
-  async findOne(advertId) {
-    // const user = await this.userRepository.findOneBy();
-    return await this.findOne({ advertId, user: User });
-  }
   async countAllViews(advertId): Promise<number> {
     const advert = await this.findOneBy(advertId);
     let totalViews = 0;
@@ -116,7 +103,7 @@ export class AdvertRepository extends Repository<Advert> {
     advertId,
     timeframe: 'day' | 'week' | 'month',
   ): Promise<number> {
-    const advert = await this.findOneBy(advertId);
+    const advert = await this.findOneBy({ id: advertId });
     const now = dayjs();
     const timeframeMap = {
       day: 'day',
@@ -130,8 +117,7 @@ export class AdvertRepository extends Repository<Advert> {
       // @ts-ignore
       dayjs(view).isAfter(now.subtract(1, timeframeMap[timeframe])),
     );
-    viewsCount += viewsWithinTimeframe.length;
-    return viewsCount;
+    return (viewsCount += viewsWithinTimeframe.length);
   }
 
   async getAveragePriceByRegion(query: PublicAdvertInfoDto): Promise<number> {

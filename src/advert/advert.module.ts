@@ -1,9 +1,9 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { CaslModule } from '../casl/casl.module';
 import { MailModule } from '../common/mail.module';
 import { User } from '../users/user.entity';
 import { UsersModule } from '../users/users.module';
@@ -24,7 +24,6 @@ import { ExchangeRateService } from './exchange-rate.service';
     }),
     TypeOrmModule.forFeature([Advert, User]),
     UsersModule,
-    CaslModule,
     MailModule,
     HttpModule,
   ],
@@ -34,6 +33,7 @@ import { ExchangeRateService } from './exchange-rate.service';
     UsersRepository,
     CarValidationService,
     ExchangeRateService,
+    JwtService,
   ],
   controllers: [AdvertController],
 })

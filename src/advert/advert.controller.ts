@@ -18,13 +18,10 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Action } from '../casl/action.enum';
-import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
-import { CheckPolicies } from '../casl/check-policy.decorator';
-import { PoliciesGuard } from '../casl/policies.guard';
 import { MailTemplate } from '../common/mail/mail.interface';
 import { MailService } from '../common/mail/mail.service';
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
+import { PermissionsGuard } from '../permissions/guards/permissions.guard';
 import { Account } from '../users/enum/account-type.enum';
 import { User } from '../users/user.entity';
 import { Advert } from './advert.entity';
@@ -32,8 +29,15 @@ import { AdvertService } from './advert.service';
 import { CarValidationService } from './car-validation.service';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
 import { UpdateAdvertDto } from './dto/update.advert.dto';
+import {
+  Action,
+  PermissionSubject,
+  PermissionSubjectTarget,
+  RequiresPermission
+} from "../permissions/decorators/permissions.decorator";
 
 @ApiTags('Adverts')
+@UseGuards(PermissionsGuard)
 @Controller('adverts')
 export class AdvertController {
   constructor(
@@ -45,29 +49,34 @@ export class AdvertController {
   ) {}
 
   @Get('list')
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.ANY,
+  )
   async geAllAds(@Query() query: PublicAdvertInfoDto) {
     return this.advertService.getAllAds(query);
   }
 
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateAdvertDTO })
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.CREATE,
+    PermissionSubjectTarget.SOME,
+  )
   @Post('create/:userId')
-  @UseGuards(AuthGuard())
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Advert))
   async createAdvert(
     @Req() req: any,
     @Param('userId') userId: string,
     @Body() body: CreateAdvertDTO,
   ): Promise<Advert> {
     const user = await this.userRepository.findOneBy({ id: userId });
-    console.log(user);
     if (user.account !== Account.PREMIUM) {
       const adsLimit = 1;
       const adsCount = await this.advertService.getUserAdsCount(user);
 
       if (adsCount < adsLimit) {
         const selectedBrand = body.brand;
-        console.log(selectedBrand);
-
         if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
           await this.mailService.send(
             'admin@example.com',
@@ -103,22 +112,33 @@ export class AdvertController {
     }
   }
 
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.SOME,
+  )
   @Get(':advertId')
   async getAdvertWithUser(@Param('advertId') advertId: string) {
     return this.advertService.getAdvertWithUser(+advertId);
   }
 
   @UseGuards(AuthGuard())
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.DELETE,
+    PermissionSubjectTarget.SOME,
+  )
   @Delete(':advertId')
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Advert))
   async deleteAdvert(@Param('advertId') advertId: string) {
     return this.advertService.deleteAdvert(advertId);
   }
 
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.UPDATE,
+    PermissionSubjectTarget.SOME,
+  )
   @Patch(':advertId')
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Advert))
   async updateAdvert(
     @Param('advertId') advertId: string,
     @Body() body: UpdateAdvertDto,
@@ -127,6 +147,11 @@ export class AdvertController {
   }
 
   @UseGuards(AuthGuard())
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.SOME,
+  )
   @Get(':userId/:advertId/views')
   async getViews(
     @Param('userId') userId: string,
@@ -144,6 +169,11 @@ export class AdvertController {
   }
 
   @UseGuards(AuthGuard())
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.SOME,
+  )
   @Get(':userId/:advertId/views_per_day')
   async getViewsPerDay(
     @Param('userId') userId: string,
@@ -161,6 +191,11 @@ export class AdvertController {
   }
 
   @UseGuards(AuthGuard())
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.SOME,
+  )
   @Get(':userId/:advertId/views_per_week')
   async getViewsPerWeek(
     @Param('userId') userId: string,
@@ -178,6 +213,11 @@ export class AdvertController {
   }
 
   @UseGuards(AuthGuard())
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.SOME,
+  )
   @Get('userId/:advertId/views_per_month')
   async getViewsPerMonth(
     @Param('userId') userId: string,
@@ -195,6 +235,11 @@ export class AdvertController {
   }
 
   @UseGuards(AuthGuard())
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.SOME,
+  )
   @Get(':userId/average_price_by_region')
   async getAverageCarPriceByRegion(
     @Param('userId') userId: string,
@@ -212,6 +257,11 @@ export class AdvertController {
   }
 
   @UseGuards(AuthGuard())
+  @RequiresPermission(
+    PermissionSubject.ADVERTS,
+    Action.READ,
+    PermissionSubjectTarget.ANY,
+  )
   @Get(':userId/average_price')
   async getAveragePrice(
     @Param('userId') userId: string,

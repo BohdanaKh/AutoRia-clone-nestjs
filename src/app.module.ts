@@ -6,9 +6,10 @@ import { AdvertModule } from './advert/advert.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { CaslModule } from './casl/casl.module';
 import { MailModule } from './common/mail.module';
 import { TypeOrmConfiguration } from './config/database/type-orm-configuration';
+import { PermissionsController } from './permissions/permissions.controller';
+import { PermissionsModule } from './permissions/permissions.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -17,11 +18,18 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AdvertModule,
     AuthModule,
-    CaslModule,
+    // CaslModule,
     MailModule,
     ScheduleModule.forRoot(),
+    PermissionsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, PermissionsController],
+  providers: [
+    AppService,
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard,
+    // },
+  ],
 })
 export class AppModule {}

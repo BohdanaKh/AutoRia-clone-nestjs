@@ -8,6 +8,7 @@ import {
 
 import { Advert } from '../advert/advert.entity';
 import { Account } from './enum/account-type.enum';
+import Role from "../permissions/enums/role.enum";
 
 @Entity()
 export class User {
@@ -32,8 +33,8 @@ export class User {
   @Column({ type: 'varchar', select: false, nullable: true })
   password: string;
 
-  @Column({ default: 'User', nullable: false })
-  role: string;
+  @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: false })
+  role: Role;
 
   @Column({
     type: 'enum',
@@ -42,7 +43,7 @@ export class User {
   })
   account: Account;
 
-  @OneToMany(() => Advert, (entity) => entity.user)T
+  @OneToMany(() => Advert, (entity) => entity.user)
   @JoinColumn()
-  adverts: Advert;
+  adverts: Advert[];
 }

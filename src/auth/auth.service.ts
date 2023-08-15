@@ -72,6 +72,8 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: {
         id: data.id,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         role: data.role,
       },
     });
@@ -109,6 +111,8 @@ export class AuthService {
   async signInUser(user) {
     return await this.signIn({
       id: user.id,
+      userName: user.userName,
+      role: user.role,
     });
   }
   //

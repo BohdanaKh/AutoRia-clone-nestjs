@@ -8,9 +8,8 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
+import Role from "../../permissions/enums/role.enum";
 
-import Role from '../enum/user.role.enum';
-import { Account } from "../enum/account-type.enum";
 
 export class UserCreateDto {
   @ApiProperty()

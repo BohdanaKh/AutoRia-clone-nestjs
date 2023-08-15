@@ -66,7 +66,7 @@ export class UsersRepository extends Repository<User> {
     };
   }
 
-  async createUser(data: UserCreateDto) {
+  async createUser(data: UserCreateDto): Promise<User> {
     const findUser = await this.findOne({
       where: { email: data.email },
     });
