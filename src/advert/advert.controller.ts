@@ -21,6 +21,12 @@ import { Repository } from 'typeorm';
 import { MailTemplate } from '../common/mail/mail.interface';
 import { MailService } from '../common/mail/mail.service';
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
+import {
+  Action,
+  PermissionSubject,
+  PermissionSubjectTarget,
+  RequiresPermission,
+} from '../permissions/decorators/permissions.decorator';
 import { PermissionsGuard } from '../permissions/guards/permissions.guard';
 import { Account } from '../users/enum/account-type.enum';
 import { User } from '../users/user.entity';
@@ -29,12 +35,6 @@ import { AdvertService } from './advert.service';
 import { CarValidationService } from './car-validation.service';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
 import { UpdateAdvertDto } from './dto/update.advert.dto';
-import {
-  Action,
-  PermissionSubject,
-  PermissionSubjectTarget,
-  RequiresPermission
-} from "../permissions/decorators/permissions.decorator";
 
 @ApiTags('Adverts')
 @UseGuards(PermissionsGuard)
@@ -77,12 +77,18 @@ export class AdvertController {
 
       if (adsCount < adsLimit) {
         const selectedBrand = body.brand;
-        if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
+        const selectedModel = body.model;
+        if (
+          !this.carValidationService.isValidCarBrand(
+            selectedBrand,
+            selectedModel,
+          )
+        ) {
           await this.mailService.send(
             'admin@example.com',
             'Missing Car Brand Notification',
             MailTemplate.MISSING_BRAND_NOTIFICATION,
-            { selectedBrand },
+            { selectedBrand, selectedModel },
           );
           throw new BadRequestException(
             `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,
@@ -97,12 +103,15 @@ export class AdvertController {
     } else {
       const selectedBrand = body.brand;
 
-      if (!this.carValidationService.isValidCarBrand(selectedBrand)) {
+      const selectedModel = body.model;
+      if (
+        !this.carValidationService.isValidCarBrand(selectedBrand, selectedModel)
+      ) {
         await this.mailService.send(
           'admin@example.com',
           'Missing Car Brand Notification',
           MailTemplate.MISSING_BRAND_NOTIFICATION,
-          { selectedBrand },
+          { selectedBrand, selectedModel },
         );
         throw new BadRequestException(
           `Invalid car brand selected. Administration is informed about missing brand: ${selectedBrand}`,

@@ -1,3 +1,4 @@
 export const AVAILABLE_CAR_BRANDS = [
-"BMW", "Daewoo"
+  { brand: 'BMW', model: 'X5' },
+  { brand: 'Daewoo', model: 'Lanos' },
 ];
