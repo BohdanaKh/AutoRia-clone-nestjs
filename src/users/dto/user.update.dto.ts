@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
-// import Role from '../roles/user.role.enum';
-
 export class UserUpdateDto {
   @ApiProperty()
   @IsString()
@@ -28,8 +26,4 @@ export class UserUpdateDto {
   @IsString()
   @IsOptional()
   city: string;
-  //
-  // @ApiProperty()
-  // @IsEnum(Role)
-  // roles: Role;
 }

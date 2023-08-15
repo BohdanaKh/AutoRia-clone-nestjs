@@ -8,7 +8,7 @@ import {
 
 import { Advert } from '../advert/advert.entity';
 import { Account } from './enum/account-type.enum';
-import Role from "../permissions/enums/role.enum";
+import { Role } from './enum/role.enum';
 
 @Entity()
 export class User {
@@ -33,7 +33,7 @@ export class User {
   @Column({ type: 'varchar', select: false, nullable: true })
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: false })
+  @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: true })
   role: Role;
 
   @Column({

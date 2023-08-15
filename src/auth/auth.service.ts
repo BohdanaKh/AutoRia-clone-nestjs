@@ -11,8 +11,8 @@ import { OAuth2Client } from 'google-auth-library';
 import process from 'process';
 import { Repository } from 'typeorm';
 
-import { UserloginDto } from '../users/dto/user.login.dto';
-import { UserloginSocialDto } from '../users/dto/user.social.login.dto';
+import { UserLoginDto } from '../users/dto/user.login.dto';
+import { UserLoginSocialDto } from '../users/dto/user.social.login.dto';
 import { User } from '../users/user.entity';
 import { JWTPayload } from './interface/auth.interface';
 
@@ -23,7 +23,7 @@ export class AuthService {
     @InjectRepository(User)
     public readonly userRepository: Repository<User>,
   ) {}
-  async login(data: UserloginDto) {
+  async login(data: UserLoginDto) {
     const findUser = await this.userRepository.findOne({
       where: { email: data.email },
     });
@@ -46,7 +46,7 @@ export class AuthService {
     return { token };
   }
 
-  async loginSocial(data: UserloginSocialDto) {
+  async loginSocial(data: UserLoginSocialDto) {
     try {
       const oAuthClient = new OAuth2Client(
         process.env.GOOGLE_CLIENT_ID,

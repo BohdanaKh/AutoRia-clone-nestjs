@@ -6,8 +6,6 @@ import * as process from 'process';
 
 import { MailService } from './mail/mail.service';
 
-
-
 @Module({
   imports: [
     MailerModule.forRoot({
@@ -17,7 +15,6 @@ import { MailService } from './mail/mail.service';
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
-        // secure: false, // Set to true if using SSL
         auth: {
           type: 'login',
           user: process.env.EMAIL_USER,

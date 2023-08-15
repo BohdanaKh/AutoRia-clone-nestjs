@@ -16,13 +16,9 @@ export class UsersRepository extends Repository<User> {
     query.order = query.order || 'ASC';
 
     const page = +query.page || 1;
-    const limit = +query.limit || 4;
+    const limit = +query.limit || 10;
     const offset = (page - 1) * limit;
 
-    // const queryBuilder = this.createQueryBuilder('users').leftJoinAndSelect(
-    //   'users.adverts',
-    //   'advert',
-    // );
     const queryBuilder = this.createQueryBuilder('users');
 
     if (query.search) {
@@ -30,29 +26,6 @@ export class UsersRepository extends Repository<User> {
         search: query.search.split(','),
       });
     }
-
-    // if (query.class) {
-    //   queryBuilder.andWhere(`LOWER(ani.class) LIKE '%:class%'`, {
-    //     class: query.class.toLowerCase(),
-    //   });
-    // }
-
-    // switch (query.sort) {
-    //   case 'userName':
-    //     queryBuilder.orderBy('user.userName', query.order);
-    //     break;
-    //   case 'age':
-    //     queryBuilder.orderBy('user.age', query.order);
-    //     break;
-    //   case 'city':
-    //     queryBuilder.orderBy('user.city', query.order);
-    //     break;
-    //   case 'animalName':
-    //     queryBuilder.orderBy('animal.name', query.order);
-    //     break;
-    //   default:
-    //     queryBuilder.orderBy('user.id', query.order);
-    // }
 
     queryBuilder.limit(limit);
     queryBuilder.offset(offset);
@@ -78,62 +51,7 @@ export class UsersRepository extends Repository<User> {
     }
     data.password = await this.getHash(data.password);
     return this.save(data);
-
-    // const id = v4();
-    // const newUser = this.userRepository.create({ id: id, ...data });
-    // newUser.lastLogin = '12-07-2023';
-    // await newUser.save();
-    // await this.save(newUser);
-    // const token = await this.singIn(newUser);
-    //
-    // return { token };
   }
-
-  // async createManager(data: ManagerCreateDto) {
-  //   const findUser = await this.findOne({
-  //     where: { email: data.email },
-  //   });
-  //   if (findUser) {
-  //     throw new HttpException(
-  //       'User with this email already exists',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  //   data.password = await this.usersService.getHash(data.password);
-  //   return this.save(data);
-  // }
-
-  // async login(data: UserloginDto) {
-  //   return await this.findOne({
-  //     where: { email: data.email },
-  //   });
-  // if (!findUser) {
-  //   throw new HttpException(
-  //     'Email or password is not correct',
-  //     HttpStatus.UNAUTHORIZED,
-  //   );
-  // }
-  // if (!(await this.compareHash(data.password, findUser.password))) {
-  //   throw new HttpException(
-  //     'Email or password is not correct',
-  //     HttpStatus.UNAUTHORIZED,
-  //   );
-  // }
-  // const token = await this.singIn(findUser);
-  //
-  // return { token };
-  // }
-
-  // async singIn(user) {
-  //   return await this.authService.signIn({
-  //     id: user.id.toString(),
-  //   });
-  // }
-
-  // async compareHash(password: string, hash: string): Promise<boolean> {
-  //   return bcrypt.compare(password, hash);
-  // }
-
   async getHash(password: string) {
     return await bcrypt.hash(password, this.salt);
   }

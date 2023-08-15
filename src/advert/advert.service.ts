@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-// import { Cron } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -24,10 +24,6 @@ export class AdvertService {
     private readonly exchangeRateService: ExchangeRateService,
   ) {}
 
-  // async createAdvert(userId: string, data: CreateAdvertDTO): Promise<Advert> {
-  //   return this.adsRepository.createAdvert(userId, data);
-  // }
-
   async createAdvert(data: CreateAdvertDTO, userId: string): Promise<Advert> {
     const user = await this.userRepository.findOneBy({ id: userId });
     const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
@@ -47,9 +43,6 @@ export class AdvertService {
       user,
     );
   }
-  // async createAdvert(data: CreateAdvertDTO) {
-  //   return await this.adsRepository.createAdvert(data);
-  // }
 
   async getAllAds(query: PublicAdvertInfoDto): Promise<PaginatedDto<Advert>> {
     return await this.adsRepository.getAllAds(query);
@@ -104,35 +97,29 @@ export class AdvertService {
   async getAveragePrice(query: PublicAdvertInfoDto): Promise<number> {
     return await this.adsRepository.getAveragePrice(query);
   }
-  // async calculateAndUpdatePrices() {
-  //   // Fetch exchange rates from the bank's API
-  //   const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
-  //
-  //   // Get the latest original prices from the database
-  //   const adsWithOriginalPrices = await this.adsRepository.find();
-  //
-  //   // Calculate prices in other currencies and update in the database
-  //   const updatedPrices = adsWithOriginalPrices.map((advert) => {
-  //     const rates = exchangeRates.map((rate) => rate.sale);
-  //     const calculatedAmountEUR = {
-  //       rate: rates[0],
-  //       price: advert.userSpecifiedPrice / rates[0],
-  //     };
-  //     const calculatedAmountUSD = {
-  //       rate: rates[1],
-  //       price: advert.userSpecifiedPrice / rates[1],
-  //     };
-  //     return {
-  //       ...advert,
-  //       priceUSD: calculatedAmountUSD,
-  //       priceEUR: calculatedAmountEUR,
-  //     };
-  //   });
-  //
-  //   await this.adsRepository.save(updatedPrices);
-  // }
-  // @Cron('0 0 * * *')
-  // async updatePricesDaily() {
-  //   await this.calculateAndUpdatePrices();
-  // }
+  async calculateAndUpdatePrices() {
+    const exchangeRates = await this.exchangeRateService.fetchExchangeRates();
+
+    const adsWithOriginalPrices = await this.adsRepository.find();
+    adsWithOriginalPrices.map((advert) => {
+      const rates = exchangeRates.map((rate) => rate.sale);
+      const calculatedAmountEUR = {
+        rate: rates[0],
+        price: advert.userSpecifiedPrice / rates[0],
+      };
+      const calculatedAmountUSD = {
+        rate: rates[1],
+        price: advert.userSpecifiedPrice / rates[1],
+      };
+      return this.adsRepository.save({
+        ...advert,
+        priceUSD: calculatedAmountUSD,
+        priceEUR: calculatedAmountEUR,
+      });
+    });
+  }
+  @Cron('0 0 * * *')
+  async updatePricesDaily() {
+    await this.calculateAndUpdatePrices();
+  }
 }

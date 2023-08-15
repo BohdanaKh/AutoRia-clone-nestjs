@@ -1,6 +1,6 @@
+import { Role } from '../users/enum/role.enum';
 import { Action } from './enums/action.enum';
 import { PermissionEffect } from './enums/permission-effect.enum';
-import Role from './enums/role.enum';
 import { PermissionSubjectTarget } from './enums/subject-target.enum';
 import { PermissionSubject } from './enums/subject-type.enum';
 import { Permission } from './types/permission.type';

@@ -55,10 +55,6 @@ export class UsersController {
   async createUserAccount(@Req() req: any, @Body() body: UserCreateDto) {
     return this.usersService.createUser(body);
   }
-  // @Post('managers/account/create')
-  // async createManagerAccount(@Req() req: any, @Body() body: ManagerCreateDto) {
-  //   return this.usersService.createUser(body);
-  // }
 
   @UseGuards(AuthGuard(), PermissionsGuard)
   @RequiresPermission(

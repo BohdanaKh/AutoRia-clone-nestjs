@@ -8,6 +8,5 @@ export class ExchangeRateService {
       'https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=11',
     );
     return response.data;
-    console.log(response.data);
   }
 }

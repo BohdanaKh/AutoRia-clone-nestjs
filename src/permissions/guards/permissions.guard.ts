@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 
+import { Role } from '../../users/enum/role.enum';
 import {
   GetSubjectIdFn,
   PermissionSubjectTarget,
@@ -9,7 +10,6 @@ import {
   RequiredPermission,
 } from '../decorators/permissions.decorator';
 import { PermissionEffect } from '../enums/permission-effect.enum';
-import Role from '../enums/role.enum';
 import {
   getPermittedSubjectIds,
   grantedMatchRequired,
@@ -29,7 +29,6 @@ export class PermissionsGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const token = request.headers.authorization?.split(' ')[1];
-    console.log(token);
     request['user'] = await this.jwtService.verifyAsync(token, {
       secret: process.env.JWT_SECRET_KEY,
     });
@@ -80,20 +79,11 @@ export class PermissionsGuard implements CanActivate {
 
     return true;
   }
-
-  /**
-   * Computes permission required to access controller action, based on
-   * controller permissions decorator. If resource target is dynamic (based on
-   * incoming request), evaluate it.
-   * @param context request context
-   * @returns computed required permission
-   */
   private getRequiredPermission(context: ExecutionContext): Permission {
     const permission = this.reflector.get<RequiredPermission>(
       REQUIRED_PERMISSION,
       context.getHandler(),
     );
-    console.log(permission);
 
     const request = context.switchToHttp().getRequest();
 

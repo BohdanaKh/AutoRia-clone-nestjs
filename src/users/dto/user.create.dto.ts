@@ -8,8 +8,8 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-import Role from "../../permissions/enums/role.enum";
 
+import { Role } from '../enum/role.enum';
 
 export class UserCreateDto {
   @ApiProperty()
@@ -30,8 +30,9 @@ export class UserCreateDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @Matches(/^\S*(?=\S{8,})(?=\S*[A-Z])(?=\S*[\d])\S*$/, {
-    message: 'Password must contain 8 items, 1 uppercase letter',
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/, {
+    message:
+      'The password must contain at least 8 characters, including at least one letter, one digit, and one special character (@, $, !, %, *, #, ?, or &).',
   })
   password: string;
 
@@ -49,9 +50,4 @@ export class UserCreateDto {
   @IsEnum(Role)
   @IsOptional()
   role: Role;
-
-  // @ApiProperty()
-  // @IsEnum(Account)
-  // @IsOptional()
-  // account: Account;
 }

@@ -27,9 +27,6 @@ export class Advert {
   @Column({ type: 'simple-json' })
   priceEUR: { rate: number; price: number };
 
-  @Column({ type: 'float' })
-  exchangeRate: number;
-
   @Column({ type: 'float', update: false })
   userSpecifiedPrice: number;
 

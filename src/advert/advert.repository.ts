@@ -3,7 +3,6 @@ import * as dayjs from 'dayjs';
 import { DataSource, Repository } from 'typeorm';
 
 import { PublicAdvertInfoDto } from '../common/query/advert.query.dto';
-// import { User } from '../users/user.entity';
 import { Advert } from './advert.entity';
 import { CreateAdvertDTO } from './dto/create.advert.dto';
 
@@ -17,7 +16,7 @@ export class AdvertRepository extends Repository<Advert> {
     query.sort = query.sort || 'id';
     query.order = query.order || 'ASC';
     const page = +query.page || 1;
-    const limit = +query.limit || 2;
+    const limit = +query.limit || 10;
     const offset = (page - 1) * limit;
 
     const queryBuilder = this.createQueryBuilder('adverts').leftJoinAndSelect(
@@ -68,26 +67,10 @@ export class AdvertRepository extends Repository<Advert> {
     calculatedPriceUSD,
     user,
   ) {
-    console.log(data);
-    // await this.userRepository.findOneBy({ id: user.id });
-
-    // data.priceUSD = calculatedPriceUSD;
-    // data.priceEUR = calculatedPriceEUR;
-
-    // console.log(data);
-    // const newAdvert = new Advert();
-    //   newAdvert.priceEUR = calculatedPriceEUR;
-    //   newAdvert.priceUSD = calculatedPriceUSD,
-    //   .exchangeRate = 2,
-    //   .userSpecifiedPrice = data.priceUAH,
-    // });
-    // console.log(newAdvert);
-    // return await this.save(newAdvert);
     return await this.save({
       ...data,
       priceUSD: calculatedPriceUSD,
       priceEUR: calculatedPriceEUR,
-      exchangeRate: 4,
       userSpecifiedPrice: data.priceUAH,
       user: user.id,
     });

@@ -18,18 +18,11 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AdvertModule,
     AuthModule,
-    // CaslModule,
     MailModule,
     ScheduleModule.forRoot(),
     PermissionsModule,
   ],
   controllers: [AppController, PermissionsController],
-  providers: [
-    AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RolesGuard,
-    // },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
