@@ -104,9 +104,11 @@ export class AdvertController {
       const selectedBrand = body.brand;
 
       const selectedModel = body.model;
-      if (
-        !this.carValidationService.isValidCarBrand(selectedBrand, selectedModel)
-      ) {
+      const validCar = this.carValidationService.isValidCarBrand(
+        selectedBrand,
+        selectedModel,
+      );
+      if (!validCar) {
         await this.mailService.send(
           'admin@example.com',
           'Missing Car Brand Notification',
